@@ -1,0 +1,17 @@
+{
+  "name": "혜원여중 아침걷기 챌린지",
+  "short_name": "아침걷기",
+  "description": "매일 아침 함께 걷는 챌린지",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF8F2",
+  "theme_color": "#FF6A4A",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
