@@ -342,7 +342,7 @@ $('inp-no').addEventListener('keydown',function(e){if(e.key==='Enter')$('inp-pin
 <script>
 (function(){
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');var rf=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(rf)return;rf=true;location.reload();});}
-  try{apiCall('getPublicConfig',[]).then(function(c){if(c&&c.ok){var a=document.getElementById('inp-no');if(a&&c.masterNo)a.placeholder=c.masterNo;var b=document.getElementById('inp-pin');if(b&&c.masterPw)b.placeholder=c.masterPw;}});}catch(e){}
+  try{apiCall('getPublicConfig',[]).then(function(c){if(c&&c.ok){var a=document.getElementById('inp-no');if(a&&c.masterNo)a.placeholder=c.masterNo;}});}catch(e){}
   try{
     var st=JSON.parse(localStorage.getItem('achim_sup')||'null');
     if(localStorage.getItem('achim_sup_token') && st && st.studentNo && typeof S!=='undefined'){
