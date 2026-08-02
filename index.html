@@ -142,7 +142,7 @@
   .mcal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
   .mcal-head span{text-align:center;font-size:11px;font-weight:700;color:var(--m2);} .mcal-head .sun{color:#E5484D;} .mcal-head .sat{color:#3B82F6;}
   .mcal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-  .mcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:700;background:#F7F3EF;color:#C4B7AD;}
+  .mcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:700;background:#F7F3EF;color:#C4B7AD;position:relative;} .mcell .wx{position:absolute;top:1px;right:3px;font-size:9px;line-height:1;}
   .mcell.empty{background:transparent;}
   .mcell.inrange{background:#fff;color:var(--t);box-shadow:inset 0 0 0 1.5px var(--div);}
   .mcell.today{box-shadow:inset 0 0 0 2px var(--suc);}
@@ -388,7 +388,7 @@ function renderCum(d){
       '<div class="goal"><span class="gl">🚶 점심 만보기</span><span class="gv">'+(d.lunchDays||0)+'일</span></div>'+
     '</div></div></div>';
 
-  var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch}; });
+  var WMAP={해:'☀️',비:'🌧️',외출:'🚶',안함:'🚫'};var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather}; });
   var rs=d.startDate||'', re=d.endDate||'', today=d.today||'';
   var months=[];
   if(rs&&re){ var a=rs.split('-'),b0=re.split('-'); var y=+a[0],mo=+a[1]-1,ey=+b0[0],em=+b0[1]-1,g=0;
@@ -404,8 +404,8 @@ function renderCum(d){
     for(var dd=1;dd<=dim;dd++){
       var iso=yy+'-'+pad(mm+1)+'-'+pad(dd);
       var inR=(iso>=rs&&iso<=re), info=map[iso], isT=(iso===today);
-      var dots=''; if(info){ if(info.m)dots+='<span class="dot m"></span>'; if(info.l)dots+='<span class="dot l"></span>'; }
-      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+'"><span>'+dd+'</span><span class="dots">'+dots+'</span></div>';
+      var dots=''; if(info){ if(info.m)dots+='<span class="dot m"></span>'; if(info.l)dots+='<span class="dot l"></span>'; } var wx=(info&&info.w&&WMAP[info.w])?('<span class="wx">'+WMAP[info.w]+'</span>'):'';
+      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+'">'+wx+'<span>'+dd+'</span><span class="dots">'+dots+'</span></div>';
     }
     return '<div class="mcal-title">'+yy+'년 '+(mm+1)+'월</div>'+head+'<div class="mcal">'+cells+'</div>';
   }
