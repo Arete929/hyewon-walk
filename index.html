@@ -444,6 +444,7 @@ $('inp-student-no').addEventListener('keydown',function(e){if(e.key==='Enter')$(
 <script>
 (function(){
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');var refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(refreshing)return;refreshing=true;location.reload();});}
+  try{apiCall('getPublicConfig',[]).then(function(c){if(c&&c.ok){var a=document.getElementById('inp-student-no');if(a&&c.masterNo)a.placeholder=c.masterNo;var b=document.getElementById('inp-pw');if(b&&c.masterPw)b.placeholder=c.masterPw;}});}catch(e){}
   var lo=document.createElement('button');lo.textContent='로그아웃';lo.style.cssText='position:fixed;top:8px;right:8px;z-index:9999;font-size:11px;font-weight:700;color:#8A7468;background:rgba(255,255,255,.9);border:1px solid #F0E5DC;border-radius:8px;padding:4px 9px;display:none;';lo.onclick=function(){localStorage.removeItem('achim_token');localStorage.removeItem('achim_student');location.reload();};document.body.appendChild(lo);
   try{
     var tok=localStorage.getItem('achim_token'), st=JSON.parse(localStorage.getItem('achim_student')||'null');
