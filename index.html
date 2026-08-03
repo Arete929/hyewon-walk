@@ -390,27 +390,28 @@ function renderCum(d){
 
   var WMAP={해:'☀️',비:'🌧️',외출:'🚶',안함:'🚫'};var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather}; });
   var rs=d.startDate||'', re=d.endDate||'', today=d.today||'';
-  var months=[];
-  if(rs&&re){ var a=rs.split('-'),b0=re.split('-'); var y=+a[0],mo=+a[1]-1,ey=+b0[0],em=+b0[1]-1,g=0;
-    while((y<ey||(y===ey&&mo<=em))&&g++<24){months.push([y,mo]); mo++; if(mo>11){mo=0;y++;}} }
-  else { var t=new Date(); months.push([t.getFullYear(),t.getMonth()]); }
   var W=['일','월','화','수','목','금','토'];
   function pad(n){return (n<10?'0':'')+n;}
-  function monthHtml(yy,mm){
-    var first=new Date(yy,mm,1).getDay(), dim=new Date(yy,mm+1,0).getDate();
+  function isoD(dt){return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());}
+  var calInner='';
+  if(rs&&re){
+    var sa=rs.split('-'),ea=re.split('-');
+    var sD=new Date(+sa[0],+sa[1]-1,+sa[2]), eD=new Date(+ea[0],+ea[1]-1,+ea[2]);
+    var cur=new Date(sD); cur.setDate(cur.getDate()-cur.getDay());
+    var lastD=new Date(eD); lastD.setDate(lastD.getDate()+(6-lastD.getDay()));
+    var title=(sD.getFullYear()===eD.getFullYear()&&sD.getMonth()===eD.getMonth())?(sD.getFullYear()+'년 '+(sD.getMonth()+1)+'월'):((sD.getMonth()+1)+'월 '+sD.getDate()+'일 ~ '+(eD.getMonth()+1)+'월 '+eD.getDate()+'일');
     var head='<div class="mcal-head">'+W.map(function(w,i){return '<span class="'+(i===0?'sun':i===6?'sat':'')+'">'+w+'</span>';}).join('')+'</div>';
     var cells='';
-    for(var i=0;i<first;i++)cells+='<div class="mcell empty"></div>';
-    for(var dd=1;dd<=dim;dd++){
-      var iso=yy+'-'+pad(mm+1)+'-'+pad(dd);
-      var inR=(iso>=rs&&iso<=re), info=map[iso], isT=(iso===today);
-      var dots=''; if(info){ if(info.m)dots+='<span class="dot m"></span>'; if(info.l)dots+='<span class="dot l"></span>'; } var wx=(info&&info.w&&WMAP[info.w])?('<span class="wx">'+WMAP[info.w]+'</span>'):'';
-      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+'">'+wx+'<span>'+dd+'</span><span class="dots">'+dots+'</span></div>';
+    while(cur.getTime()<=lastD.getTime()){
+      var iso=isoD(cur), inR=(iso>=rs&&iso<=re), info=map[iso], isT=(iso===today);
+      var dots=''; if(info){ if(info.m)dots+='<span class="dot m"></span>'; if(info.l)dots+='<span class="dot l"></span>'; }
+      var wx=(info&&info.w&&WMAP[info.w])?('<span class="wx">'+WMAP[info.w]+'</span>'):'';
+      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+'">'+wx+'<span>'+cur.getDate()+'</span><span class="dots">'+dots+'</span></div>';
+      cur.setDate(cur.getDate()+1);
     }
-    return '<div class="mcal-title">'+yy+'년 '+(mm+1)+'월</div>'+head+'<div class="mcal">'+cells+'</div>';
-  }
-  var calCard='<div class="card">'+months.map(function(x){return monthHtml(x[0],x[1]);}).join('<div style="height:14px;"></div>')+
-    '<div class="legend2"><span><i class="dot m"></i>아침 운동</span><span><i class="dot l"></i>점심 만보기</span><span><i class="tdot"></i>오늘</span></div></div>';
+    calInner='<div class="mcal-title">'+title+'</div>'+head+'<div class="mcal">'+cells+'</div>';
+  } else { calInner='<p class="center muted" style="padding:16px;">기간 정보가 없어요</p>'; }
+  var calCard='<div class="card">'+calInner+'<div class="legend2"><span><i class="dot m"></i>아침 운동</span><span><i class="dot l"></i>점심 만보기</span><span><i class="tdot"></i>오늘</span></div></div>';
 
   var b=d.best;
   var bestCard=b?('<div class="card"><div class="t1" style="font-weight:800;margin-bottom:10px;">🏅 개인 최고기록</div>'+

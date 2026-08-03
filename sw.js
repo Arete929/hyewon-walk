@@ -1,5 +1,5 @@
 /* 아침걷기 챌린지 PWA 서비스워커 | 버전 올리면 캐시 갱신·자동 새로고침 */
-var CACHE = 'achim-v1.3.0';
+var CACHE = 'achim-v1.4.0';
 var ASSETS = ['./', './index.html', './supporter.html', './teacher.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
