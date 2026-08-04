@@ -143,6 +143,12 @@
   .mcal-head span{text-align:center;font-size:11px;font-weight:700;color:var(--m2);} .mcal-head .sun{color:#E5484D;} .mcal-head .sat{color:#3B82F6;}
   .mcal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
   .mcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:700;background:#F7F3EF;color:#C4B7AD;position:relative;} .mcell .wx{position:absolute;top:1px;right:3px;font-size:9px;line-height:1;}
+  .mcell .wx .wxi,.wxi{width:13px;height:13px;object-fit:contain;display:block;}
+  .tabbar button .ti img{width:22px;height:22px;object-fit:contain;display:block;}
+  .tile.ico{background:#FFF6EF;} .tile img{width:42px;height:42px;object-fit:contain;}
+  .btn-ic{width:20px;height:20px;object-fit:contain;vertical-align:-4px;margin-right:3px;}
+  .badge-ic{width:18px;height:18px;object-fit:contain;vertical-align:-3px;margin-right:3px;}
+  .medal-img{width:24px;height:24px;object-fit:contain;vertical-align:middle;}
   .mcell.empty{background:transparent;}
   .mcell.inrange{background:#fff;color:var(--t);box-shadow:inset 0 0 0 1.5px var(--div);}
   .mcell.today{box-shadow:inset 0 0 0 2px var(--suc);}
@@ -205,7 +211,7 @@
     </div>
     <img id="nrc-prev" class="preview" alt="">
     <div class="drop" id="drop" onclick="document.getElementById('nrc-file').click()">
-      <div class="tile run">📷</div>
+      <div class="tile run ico"><img src="https://arete929.github.io/hyewon-walk/icons/photo.png"></div>
       <div class="d1">탭하여 사진 선택</div>
       <div class="d2">JPG · PNG · 최대 10MB</div>
     </div>
@@ -245,8 +251,8 @@
   <!-- 탭바 -->
   <div class="tabbar" id="tabbar" style="display:none;">
     <button id="tb-home" class="active" onclick="tab('home')"><span class="ti">🏠</span>오늘</button>
-    <button id="tb-cum" onclick="tab('cum')"><span class="ti">📅</span>누적</button>
-    <button id="tb-rank" onclick="tab('rank')"><span class="ti">🏆</span>순위</button>
+    <button id="tb-cum" onclick="tab('cum')"><span class="ti"><img src="https://arete929.github.io/hyewon-walk/icons/cum.png"></span>누적</button>
+    <button id="tb-rank" onclick="tab('rank')"><span class="ti"><img src="https://arete929.github.io/hyewon-walk/icons/rank.png"></span>순위</button>
   </div>
 </div>
 
@@ -289,13 +295,13 @@ function renderHome(d){
   var runBadge=done?'<span class="pill pill-done">인증 완료 ✓</span>':'<span class="pill pill-wait">미제출</span>';
   var runCta=done
     ? '<div class="center muted" style="font-size:13px;margin-top:12px;">오늘의 러닝 인증 완료! 🎉'+(d.morning.km?' · '+d.morning.km+'km':'')+'</div>'
-    : '<button class="btn btn-cta" style="margin-top:14px;" onclick="go(\'nrc\')">📷 러닝 사진 제출</button>';
+    : '<button class="btn btn-cta" style="margin-top:14px;" onclick="go(\'nrc\')"><img class="btn-ic" src="https://arete929.github.io/hyewon-walk/icons/photo.png">러닝 사진 제출</button>';
   var steps=(d.lunch&&d.lunch.steps)||0, goal=10000, pct=Math.min(100,Math.round(steps/goal*100));
   var lunchInfo=steps?('<div class="t2">'+steps.toLocaleString()+'보 / '+((d.lunch.km!=null)?d.lunch.km:Math.round(steps*0.7)/1000)+'km</div>'):'<div class="t2">아직 기록 없음</div>';
   $('hm-body').innerHTML=
     '<div class="label">오늘의 미션</div>'+
-    '<div class="card"><div class="mcard"><div class="tile run">🏃‍♀️</div><div class="mid"><div class="t1">아침 러닝</div><div class="t2">운동앱 기록 인증 (NRC·삼성헬스 등)</div></div>'+runBadge+'</div>'+runCta+'</div>'+
-    '<div class="card"><div class="mcard"><div class="tile walk">🚶‍♀️</div><div class="mid"><div class="t1">점심 만보기</div>'+lunchInfo+'</div></div>'+
+    '<div class="card"><div class="mcard"><div class="tile run ico"><img src="https://arete929.github.io/hyewon-walk/icons/run.png"></div><div class="mid"><div class="t1">아침 러닝</div><div class="t2">운동앱 기록 인증 (NRC·삼성헬스 등)</div></div>'+runBadge+'</div>'+runCta+'</div>'+
+    '<div class="card"><div class="mcard"><div class="tile walk ico"><img src="https://arete929.github.io/hyewon-walk/icons/walk.png"></div><div class="mid"><div class="t1">점심 만보기</div>'+lunchInfo+'</div></div>'+
       '<div class="gauge"><i style="width:'+pct+'%"></i></div><div class="t2" style="margin-top:6px;color:var(--m);font-size:12px;">목표 '+goal.toLocaleString()+'보 · '+pct+'%</div></div>'+
     '<div class="stat-row"><div class="stat grad"><div class="v">'+(d.day||'-')+'</div><div class="l">현재 일차</div></div><div class="stat white"><div class="v">'+(steps?'O':'-')+'</div><div class="l">점심 만보기</div></div></div>';
 }
@@ -331,7 +337,7 @@ function renderResult(r){
   cells+=g('🏃 평균 페이스', r.pace?(r.pace+'/km'):'-');
   if(!under){ cells+=g('⚡ 평균 속도', r.speed?(r.speed+'km/h'):'-'); cells+=g('🔥 칼로리', r.kcal?(r.kcal+'kcal'):'-'); }
   $('rs-body').innerHTML=
-    '<div class="succ-badge">✅ 러닝 인증 완료</div>'+
+    '<div class="succ-badge"><img class="badge-ic" src="https://arete929.github.io/hyewon-walk/icons/check.png">러닝 인증 완료</div>'+
     '<div class="hero"><div class="hd">'+esc(r.date||'')+'</div><div class="big">'+(r.distance!=null?r.distance:'-')+'<span style="font-size:20px;font-weight:700;">km</span></div><div class="cap">총 이동 거리</div></div>'+
     cheer+
     '<div class="grid2">'+cells+'</div>'+
@@ -358,7 +364,7 @@ function renderRank(){
     var list=students().filter(function(s){return s.totalKm>0;}).sort(function(a,b){return b.totalKm-a.totalKm;}).slice(0,50);
     if(!list.length){body.innerHTML='<p class="center muted" style="padding:30px;">아직 기록이 없어요</p>';return;}
     body.innerHTML=list.map(function(s,i){
-      var me=s.studentNo===ST.no; var medal=['🥇','🥈','🥉'][i]||(i+1);
+      var me=s.studentNo===ST.no; var medal=i<3?('<img class="medal-img" src="https://arete929.github.io/hyewon-walk/icons/medal'+(i+1)+'.png">'):(i+1);
       return '<div class="rrow'+(me?' me':'')+'"><div class="rk">'+medal+'</div><div class="ava">'+esc(s.name.charAt(0))+'</div><div class="ri"><div class="n">'+(s.studentNo?esc(s.studentNo)+' ':'')+esc(s.name)+(me?'<span class="me-badge">나</span>':'')+'</div><div class="c">'+s.grade+'-'+s.classNo+'</div></div><div class="km">'+(Math.round(s.totalKm*10)/10)+'km</div></div>';
     }).join('');
   } else {
@@ -367,7 +373,7 @@ function renderRank(){
     var arr=Object.keys(cls).map(function(k){var o=cls[k];o.avg=o.part?o.km/o.part:0;return o;}).sort(function(a,b){return b.avg-a.avg;}).slice(0,30);
     if(!arr.length){body.innerHTML='<p class="center muted" style="padding:30px;">데이터 없음</p>';return;}
     body.innerHTML=arr.map(function(o,i){
-      var mine=(o.g===ST.grade&&o.c===ST.classNo); var medal=['🥇','🥈','🥉'][i]||(i+1);
+      var mine=(o.g===ST.grade&&o.c===ST.classNo); var medal=i<3?('<img class="medal-img" src="https://arete929.github.io/hyewon-walk/icons/medal'+(i+1)+'.png">'):(i+1);
       return '<div class="rrow'+(mine?' me':'')+'"><div class="rk">'+medal+'</div><div class="ava" style="background:var(--sky);">'+o.g+'-'+o.c+'</div><div class="ri"><div class="n">'+o.g+'학년 '+o.c+'반'+(mine?'<span class="me-badge">우리 반</span>':'')+'</div><div class="c">참여 '+o.part+'/'+o.n+'명</div></div><div class="km">'+(Math.round(o.avg*10)/10)+'km</div></div>';
     }).join('');
   }
@@ -388,7 +394,7 @@ function renderCum(d){
       '<div class="goal"><span class="gl">🚶 점심 만보기</span><span class="gv">'+(d.lunchDays||0)+'일</span></div>'+
     '</div></div></div>';
 
-  var WMAP={해:'☀️',비:'🌧️',외출:'🚶',안함:'🚫'};var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather}; });
+  var WMAP={해:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-sun.png">',비:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-rain.png">',외출:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-out.png">',안함:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-no.png">'};var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather}; });
   var rs=d.startDate||'', re=d.endDate||'', today=d.today||'';
   var W=['일','월','화','수','목','금','토'];
   function pad(n){return (n<10?'0':'')+n;}
@@ -433,8 +439,8 @@ function startQr(){
   },function(){box.innerHTML=qrResult(false,'GPS 권한/신호를 확인해 주세요.');},{enableHighAccuracy:true,timeout:10000});
 }
 function qrResult(ok,msg){
-  return '<div style="font-size:64px;">'+(ok?'✅':'❌')+'</div><div style="font-size:22px;font-weight:800;margin:8px 0;color:'+(ok?'var(--suc-t)':'var(--err)')+';">'+(ok?'체크인 성공!':'체크인 실패')+'</div><div class="muted" style="white-space:pre-line;font-size:14px;">'+esc(msg)+'</div>'+
-    (ok?'<button class="btn btn-cta" style="margin-top:20px;" onclick="go(\'nrc\')">📷 러닝 사진 제출</button>':'')+
+  return '<div style="font-size:64px;">'+(ok?'<img src="https://arete929.github.io/hyewon-walk/icons/check.png" style="width:64px;height:64px;">':'❌')+'</div><div style="font-size:22px;font-weight:800;margin:8px 0;color:'+(ok?'var(--suc-t)':'var(--err)')+';">'+(ok?'체크인 성공!':'체크인 실패')+'</div><div class="muted" style="white-space:pre-line;font-size:14px;">'+esc(msg)+'</div>'+
+    (ok?'<button class="btn btn-cta" style="margin-top:20px;" onclick="go(\'nrc\')"><img class="btn-ic" src="https://arete929.github.io/hyewon-walk/icons/photo.png">러닝 사진 제출</button>':'')+
     '<button class="btn btn-ghost" style="margin-top:10px;" onclick="tab(\'home\')">홈으로</button>';
 }
 
