@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ supporter.html · 서포터즈 앱 · v2.8.0 · 2026-07-01
+<!-- ▣ supporter.html · 서포터즈 앱 · v2.16.3 · 2026-08-05
      수정요약: 로그인 폼 제목(서포터즈 운동기록) 삭제·제목 제거·로고 크게 -->
 <html lang="ko">
 <head>
@@ -141,7 +141,7 @@
   <div id="s-main" class="screen">
     <div class="topbar">
       <div><div class="l1" id="cls-title">학급 선택</div><div class="l2" id="sup-name">김서포 님</div></div>
-      <button onclick="showCheckinQr()" style="background:rgba(255,255,255,.25);border:none;color:#fff;font-weight:800;font-size:13px;border-radius:14px;padding:8px 11px;margin-left:auto;margin-right:8px;cursor:pointer;">📍 체크인 QR</button>
+      <button onclick="showCheckinQr()" style="background:rgba(255,255,255,.25);border:none;color:#fff;font-weight:800;font-size:13px;border-radius:14px;padding:8px 11px;margin-left:auto;margin-right:8px;cursor:pointer;"><img src="https://arete929.github.io/hyewon-walk/icons/checkin.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px">체크인 QR</button>
       <div class="day" id="day-badge">DAY -</div>
     </div>
     <div class="body" id="main-body"></div>
@@ -153,7 +153,7 @@
 
   <!-- 오늘 체크인 QR -->
   <div id="s-qr" class="screen">
-    <div class="topbar"><div><div class="l1">📍 오늘 아침 체크인 QR</div><div class="l2">학생이 스캔하면 출석 체크인</div></div></div>
+    <div class="topbar"><div><div class="l1"><img src="https://arete929.github.io/hyewon-walk/icons/checkin.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px">오늘 아침 체크인 QR</div><div class="l2">학생이 스캔하면 출석 체크인</div></div></div>
     <div class="body" id="qr-body" style="text-align:center;"></div>
     <div class="tabbar"><button onclick="stopQr();showScreen('main')">← 돌아가기</button></div>
   </div>
@@ -222,7 +222,7 @@ function renderPicker(){
   $('cls-title').textContent='학급 선택';
   $('day-badge').textContent='DAY -';
   $('main-body').innerHTML=
-    '<div class="pick-card"><h3>학년 · 반 선택 🎒</h3>'+
+    '<div class="pick-card"><h3>학년 · 반 선택 <img src="https://arete929.github.io/hyewon-walk/icons/class.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px"></h3>'+
     '<div class="pl">학년</div><div class="chips" id="pg"></div>'+
     '<div class="pl">반</div><div class="chips c5" id="pc"></div>'+
     '<button class="btn" style="margin-top:16px;" onclick="loadClass()">조회하기</button></div>';
@@ -252,8 +252,8 @@ function renderList(){
   var done=S.students.filter(doneFn).length, total=S.students.length, rate=total?Math.round(done/total*100):0;
   var lab=S.mode==='morning'?['인증','미인증']:['입력','미입력'];
   var head=
-    '<div class="seg"><button class="'+(S.mode==='morning'?'active':'')+'" onclick="setMode(\'morning\')">🌅 아침 러닝</button>'+
-    '<button class="'+(S.mode==='lunch'?'active':'')+'" onclick="setMode(\'lunch\')">🥗 점심</button></div>'+
+    '<div class="seg"><button class="'+(S.mode==='morning'?'active':'')+'" onclick="setMode(\'morning\')"><img src="https://arete929.github.io/hyewon-walk/icons/run.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px">아침 러닝</button>'+
+    '<button class="'+(S.mode==='lunch'?'active':'')+'" onclick="setMode(\'lunch\')"><img src="https://arete929.github.io/hyewon-walk/icons/walk.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px">점심</button></div>'+
     '<div class="sum"><span class="pill pill-ok">'+lab[0]+' '+done+'</span><span class="pill pill-no">'+lab[1]+' '+(total-done)+'</span><span class="rate">'+rate+'%</span></div>'+
     '<div class="track"><i style="width:'+rate+'%"></i></div>';
   var list = total===0 ? '<p class="center muted" style="padding:20px;">명단이 없습니다.</p>'
@@ -269,7 +269,7 @@ function morningRow(s){
     ? '<span class="stu-sum">'+(s.morningKm!=null?s.morningKm+'㎞':'')+'</span><span class="pill pill-ok">인증 ✓</span>'
     : '<span class="pill pill-no">미인증</span>';
   var ck = s.morningChecked
-    ? '<span class="lab">✅ 체크인 '+esc(s.morningTime||'')+'</span>'
+    ? '<span class="lab"><img src="https://arete929.github.io/hyewon-walk/icons/check.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px">체크인 '+esc(s.morningTime||'')+'</span>'
     : '<span class="lab">미체크인</span><button class="btn btn-sm btn-ghost" style="width:auto;padding:0 14px;margin-left:auto;" onclick="proxyCk(\''+esc(s.studentNo)+'\',event)">대리 체크인</button>';
   var d=deriveRun(s.morningKm,s.morningSec?fmtSec(s.morningSec):'');
   return '<div class="stu'+(open?' open':'')+'" data-no="'+esc(s.studentNo)+'">'+
@@ -282,7 +282,7 @@ function morningRow(s){
       '<div class="save-row"><button class="btn btn-sm" onclick="saveRun(\''+esc(s.studentNo)+'\',event)">러닝 저장</button></div>'+
     '</div></div>';
 }
-function calcHtml(d){ if(!d)return''; return '<div class="c c-pace">🏃 '+(d.pace||'-')+'</div><div class="c c-spd">⚡ '+(d.speed!=null?d.speed:'-')+'㎞/h</div><div class="c c-cal">🔥 '+(d.cal!=null?d.cal:'-')+'㎉</div>'; }
+function calcHtml(d){ if(!d)return''; return '<div class="c c-pace"><img src="https://arete929.github.io/hyewon-walk/icons/pace.png" style="width:14px;height:14px;object-fit:contain;vertical-align:-2px;margin-right:2px">'+(d.pace||'-')+'</div><div class="c c-spd"><img src="https://arete929.github.io/hyewon-walk/icons/speed.png" style="width:14px;height:14px;object-fit:contain;vertical-align:-2px;margin-right:2px">'+(d.speed!=null?d.speed:'-')+'㎞/h</div><div class="c c-cal"><img src="https://arete929.github.io/hyewon-walk/icons/cal.png" style="width:14px;height:14px;object-fit:contain;vertical-align:-2px;margin-right:2px">'+(d.cal!=null?d.cal:'-')+'㎉</div>'; }
 function calc(no){
   var row=document.querySelector('.stu[data-no="'+no+'"]'); if(!row)return;
   var km=row.querySelector('.mr-km').value, dur=row.querySelector('.mr-dur').value;
