@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ supporter.html · 서포터즈 앱 · v2.22.0 · 2026-08-11 · 📋 내 근무일 추가(getMyRoster)
+<!-- ▣ supporter.html · 서포터즈 앱 · v2.23.0 · 2026-08-11 · 로그인 이름추가·대리체크인 사유필수·내 근무일
      수정요약: 로그인 폼 제목(서포터즈 운동기록) 삭제·제목 제거·로고 크게 -->
 <html lang="ko">
 <head>
@@ -129,7 +129,8 @@
     <div class="form-card">
       
       <div id="lg-err" class="err"></div>
-      <div class="field"><label>학번</label><input id="inp-no" class="input" type="number" inputmode="numeric" placeholder="2210"></div>
+      <div class="field"><label>학번</label><input id="inp-no" class="input" type="number" inputmode="numeric" placeholder="예: 34277"></div>
+      <div class="field"><label>이름</label><input id="inp-name" class="input" type="text" maxlength="10" placeholder="예: 김체육"></div>
       <div class="field"><label>PIN 4자리</label><input id="inp-pin" class="input pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
       <button class="btn" id="btn-login" onclick="doLogin()">로그인 →</button>
     </div>
@@ -204,13 +205,13 @@ function deriveRun(km,dur){km=parseFloat(km);if(!isFinite(km)||km<=0)return null
 
 /* 로그인 */
 function doLogin(){
-  var no=$('inp-no').value.trim(),pin=$('inp-pin').value.trim(),e=$('lg-err');e.classList.remove('show');
-  if(!no||!pin){showErr(e,'학번과 PIN을 입력해 주세요.');return;}
+  var no=$('inp-no').value.trim(),name=$('inp-name').value.trim(),pin=$('inp-pin').value.trim(),e=$('lg-err');e.classList.remove('show');
+  if(!no||!name||!pin){showErr(e,'학번·이름·PIN을 모두 입력해 주세요.');return;}
   var b=$('btn-login');b.disabled=true;b.textContent='확인 중…';
   google.script.run.withSuccessHandler(function(r){b.disabled=false;b.textContent='로그인 →';
     if(r.ok){S.sup={studentNo:r.studentNo,name:r.name};localStorage.setItem('achim_sup',JSON.stringify(S.sup));$('sup-name').textContent=r.name+' 님';showScreen('main');renderPicker();}
     else showErr(e,r.reason||'로그인 실패');
-  }).withFailureHandler(function(x){b.disabled=false;b.textContent='로그인 →';showErr(e,'오류: '+x.message);}).supporterLogin(no,pin);
+  }).withFailureHandler(function(x){b.disabled=false;b.textContent='로그인 →';showErr(e,'오류: '+x.message);}).supporterLogin(no,name,pin);
 }
 function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});$('s-'+id).classList.add('active');window.scrollTo(0,0);}
 function logout(){stopQr();S.sup=null;localStorage.removeItem('achim_sup');localStorage.removeItem('achim_sup_token');$('inp-pin').value='';showScreen('login');}
@@ -318,11 +319,15 @@ function calc(no){
 function toggle(no){S.openNo=(S.openNo===no?null:no);renderList();}
 
 function proxyCk(no,ev){ if(ev)ev.stopPropagation();
+  var reason=prompt('대리 체크인 사유를 반드시 입력하세요.\n(예: 스마트폰 미소지 / 배터리 방전 / 앱 오류 등)');
+  if(reason===null) return;
+  reason=(reason||'').trim();
+  if(!reason){ toast('사유를 입력해야 대리 체크인이 됩니다.'); return; }
   google.script.run.withSuccessHandler(function(r){
     var s=S.students.filter(function(x){return x.studentNo===no;})[0];
     if(r.ok){if(s){s.morningChecked=true;s.morningTime=r.time;}toast('체크인 완료');renderList();}
     else {if(r.already&&s){s.morningChecked=true;} toast(r.reason||'실패');renderList();}
-  }).withFailureHandler(function(){toast('오류가 발생했습니다.');}).supporterProxyCheckIn(no,{studentNo:S.sup.studentNo,name:S.sup.name});
+  }).withFailureHandler(function(){toast('오류가 발생했습니다.');}).supporterProxyCheckIn(no,{studentNo:S.sup.studentNo,name:S.sup.name},reason);
 }
 
 function saveRun(no,ev){ if(ev)ev.stopPropagation();
