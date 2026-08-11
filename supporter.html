@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ supporter.html · 서포터즈 앱 · v2.16.3 · 2026-08-05
+<!-- ▣ supporter.html · 서포터즈 앱 · v2.22.0 · 2026-08-11 · 📋 내 근무일 추가(getMyRoster)
      수정요약: 로그인 폼 제목(서포터즈 운동기록) 삭제·제목 제거·로고 크게 -->
 <html lang="ko">
 <head>
@@ -141,7 +141,8 @@
   <div id="s-main" class="screen">
     <div class="topbar">
       <div><div class="l1" id="cls-title">학급 선택</div><div class="l2" id="sup-name">김서포 님</div></div>
-      <button onclick="showCheckinQr()" style="background:rgba(255,255,255,.25);border:none;color:#fff;font-weight:800;font-size:13px;border-radius:14px;padding:8px 11px;margin-left:auto;margin-right:8px;cursor:pointer;"><img src="https://arete929.github.io/hyewon-walk/icons/checkin.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px">체크인 QR</button>
+      <button onclick="showMyRoster()" style="background:rgba(255,255,255,.25);border:none;color:#fff;font-weight:800;font-size:13px;border-radius:14px;padding:8px 11px;margin-left:auto;margin-right:6px;cursor:pointer;">📋 내 근무</button>
+      <button onclick="showCheckinQr()" style="background:rgba(255,255,255,.25);border:none;color:#fff;font-weight:800;font-size:13px;border-radius:14px;padding:8px 11px;margin-right:8px;cursor:pointer;"><img src="https://arete929.github.io/hyewon-walk/icons/checkin.png" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:3px">체크인 QR</button>
       <div class="day" id="day-badge">DAY -</div>
     </div>
     <div class="body" id="main-body"></div>
@@ -157,6 +158,13 @@
     <div class="body" id="qr-body" style="text-align:center;"></div>
     <div class="tabbar"><button onclick="stopQr();showScreen('main')">← 돌아가기</button></div>
   </div>
+
+  <!-- 내 근무일 -->
+  <div id="s-roster" class="screen">
+    <div class="topbar"><div><div class="l1">📋 내 근무일</div><div class="l2">배정된 아침·점심 근무</div></div></div>
+    <div class="body" id="roster-body" style="padding:16px 18px 90px;"></div>
+    <div class="tabbar"><button onclick="showScreen('main')">← 돌아가기</button></div>
+  </div>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -165,8 +173,26 @@
 /* [PWA] GAS API와 fetch 통신 — google.script.run 인터페이스 유지 (서포터) */
 var API_BASE='https://script.google.com/macros/s/AKfycby_havXeiD6E9PkN3do6WE4wF6OhcM5XotBrPovh85GSrJxHE3jo0R1bx0LBUg1CVeZ/exec';
 function apiCall(fn,args){return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,token:localStorage.getItem('achim_sup_token')||'',args:args||[]})}).then(function(r){return r.json();}).then(function(res){if(res&&res.token)localStorage.setItem('achim_sup_token',res.token);return res;});}
-function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['supporterLogin','getCheckinQrUrl','getClassRoster','supporterProxyCheckIn','submitMorningRun','submitLunchSteps','lookupStudentName'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
+function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['supporterLogin','getCheckinQrUrl','getClassRoster','supporterProxyCheckIn','submitMorningRun','submitLunchSteps','lookupStudentName','getMyRoster'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
 window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
+
+function showMyRoster(){
+  showScreen('roster');
+  var b=document.getElementById('roster-body');
+  b.innerHTML='<div style="text-align:center;color:var(--m);padding:34px;">불러오는 중…</div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r||!r.ok){ b.innerHTML='<div style="text-align:center;color:var(--warn);padding:34px;">근무표를 불러오지 못했어요.</div>'; return; }
+    if(!r.shifts||!r.shifts.length){ b.innerHTML='<div style="text-align:center;color:var(--m);padding:44px 20px;"><div style="font-size:46px;">🗓️</div><div style="margin-top:12px;font-weight:800;">아직 배정된 근무가 없어요.</div><div style="font-size:13px;margin-top:6px;color:var(--m2);">선생님이 근무표를 정하면 여기에 표시돼요.</div></div>'; return; }
+    var byDate={};
+    r.shifts.forEach(function(s){ (byDate[s.md]=byDate[s.md]||[]).push(s.slot); });
+    var html='<div style="font-size:13px;color:var(--m);font-weight:800;margin-bottom:12px;">총 '+r.shifts.length+'회 근무예요! 💪</div>';
+    html+=Object.keys(byDate).map(function(md){
+      var slots=byDate[md].map(function(sl){ var am=sl==='아침'; return '<span style="display:inline-block;background:'+(am?'linear-gradient(135deg,#FFC93C,#FF9E3D)':'linear-gradient(135deg,#7FB4FF,#5B8DEF)')+';color:#fff;border-radius:999px;padding:4px 13px;font-size:12px;font-weight:800;margin-right:6px;">'+(am?'🌅 아침':'🌞 점심')+'</span>'; }).join('');
+      return '<div style="background:#fff;border-radius:15px;padding:13px 15px;margin-bottom:9px;box-shadow:0 8px 20px -14px rgba(0,0,0,.25);display:flex;align-items:center;gap:12px;"><div style="font-weight:800;font-size:15px;min-width:78px;">'+esc(md)+'</div><div>'+slots+'</div></div>';
+    }).join('');
+    b.innerHTML=html;
+  }).withFailureHandler(function(){ b.innerHTML='<div style="text-align:center;color:var(--warn);padding:34px;">오류가 발생했어요. 다시 시도해 주세요.</div>'; }).getMyRoster();
+}
 
 var S={ sup:null, grade:3, classNo:2, mode:'morning', students:[], day:0, openNo:null };
 function $(id){return document.getElementById(id);}
