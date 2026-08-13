@@ -30,13 +30,14 @@
 
   /* ── BODY ── */
   .body{flex:1;padding:9mm 16mm 12mm;display:flex;flex-direction:column;gap:6.5mm;}
-  .period{display:flex;align-items:center;justify-content:center;gap:5mm;background:#fff;border:2px solid var(--line);border-radius:6mm;padding:5mm 6mm;box-shadow:0 8px 22px -14px rgba(200,90,40,.35);}
-  .period .dwrap{text-align:center;}
-  .period .dlabel{font-size:3.5mm;font-weight:800;color:var(--ink2);opacity:.85;letter-spacing:.1mm;margin-bottom:.8mm;}
-  .period .d{font-size:6.2mm;font-weight:900;color:var(--coral-dk);letter-spacing:-.2mm;white-space:nowrap;}
-  .period .d .dow{font-size:4.2mm;font-weight:800;margin-left:.4mm;}
-  .period .dnote{font-size:3.3mm;font-weight:700;color:#B08A72;margin-top:1mm;}
-  .period .t{font-size:4mm;font-weight:700;color:var(--ink2);border-left:1.5px solid var(--line);padding-left:5mm;line-height:1.4;}
+  .period{display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;border:2px solid var(--line);border-radius:6mm;padding:5mm 6mm;box-shadow:0 8px 22px -14px rgba(200,90,40,.35);}
+  .period .dlabel{font-size:3.6mm;font-weight:800;color:var(--ink2);opacity:.85;letter-spacing:.1mm;}
+  .period .d{margin-top:1.2mm;font-size:6.4mm;font-weight:900;color:var(--coral-dk);letter-spacing:-.2mm;white-space:nowrap;}
+  .period .d .dow{font-size:4.3mm;font-weight:800;margin-left:.4mm;}
+  .period .dnote{font-size:3.4mm;font-weight:700;color:#B08A72;margin-top:1.2mm;}
+  .period .t{margin-top:3.2mm;padding-top:3mm;border-top:1.5px solid var(--line);width:100%;font-size:4mm;font-weight:700;color:var(--ink2);line-height:1.45;}
+  .period .t span{white-space:nowrap;}
+  .period .t .sep{color:var(--line);margin:0 2.2mm;}
   .intro{text-align:center;font-size:4.6mm;font-weight:600;color:var(--ink2);line-height:1.55;}
   .intro b{color:var(--coral-dk);font-weight:800;}
 
@@ -65,7 +66,9 @@
   .cta{flex:1;}
   .cta .go{font-size:6mm;font-weight:900;color:var(--coral-dk);}
   .cta .url{font-size:3.8mm;font-weight:700;color:var(--ink2);margin-top:1mm;}
-  .cta .sup{margin-top:3mm;font-size:3.6mm;font-weight:700;color:var(--green);background:#E8F7EE;border:1px solid #BFE6CC;border-radius:99px;padding:1.5mm 4mm;display:inline-block;}
+  .cta .sup{margin-top:3mm;font-size:3.6mm;font-weight:700;color:#8A6300;background:#FFF7DC;border:1px solid #F3D98C;border-radius:99px;padding:1.5mm 4mm;display:inline-block;}
+  .cta .sup b{color:#7A5600;}
+  .vest{width:5mm;height:5mm;vertical-align:-1.3mm;margin-right:1.2mm;}
   .brand{text-align:right;font-size:3.5mm;font-weight:800;color:var(--ink2);line-height:1.5;}
   .brand b{color:var(--coral-dk);}
 
@@ -87,12 +90,10 @@
 
   <div class="body">
     <div class="period">
-      <div class="dwrap">
-        <div class="dlabel">📅 챌린지 기간</div>
-        <div class="d">8월 24일<span class="dow">(월)</span> → 9월 4일<span class="dow">(금)</span></div>
-        <div class="dnote">※ 주말 제외</div>
-      </div>
-      <div class="t">월~금 · 2주간<br>아침 08:00–08:45<br>점심 식사 후 ~ 13:25</div>
+      <div class="dlabel">📅 챌린지 기간</div>
+      <div class="d">8월 24일<span class="dow">(월)</span> → 9월 4일<span class="dow">(금)</span></div>
+      <div class="dnote">※ 주말 제외 · 월~금 2주간</div>
+      <div class="t"><span>아침 08:00–08:45</span><span class="sep">|</span><span>점심 식사 후 ~ 13:25</span></div>
     </div>
 
     <div class="intro">아침엔 <b>함께 걷고</b>, 점심엔 <b>만보기나 개인장비</b>로! 친구·우리 반과 <b>실시간 순위</b>로 겨뤄요 😊</div>
@@ -128,7 +129,7 @@
       <div class="cta">
         <div class="go">참여 방법이 궁금하면? →</div>
         <div class="url">QR 스캔 → 학생 사용 설명서</div>
-        <div class="sup">🦺 빨간 조끼를 입은 <b>학생 서포터즈</b>가 운영을 도와줘요</div>
+        <div class="sup"><svg class="vest" viewBox="0 0 32 32" aria-label="노란 조끼"><g stroke="#C99400" stroke-width="1.5" stroke-linejoin="round"><path d="M11.5 3 L15 8.4 L15 28.5 L4 28.5 L5.4 5.2 Z" fill="#FFD21E"/><path d="M20.5 3 L17 8.4 L17 28.5 L28 28.5 L26.6 5.2 Z" fill="#FFD21E"/></g><g fill="#F2F6FB" stroke="#C9D4E0" stroke-width=".5"><rect x="4.6" y="15.4" width="10.1" height="2.7"/><rect x="17.3" y="15.4" width="10.1" height="2.7"/><rect x="4.4" y="21.3" width="10.3" height="2.7"/><rect x="17.3" y="21.3" width="10.3" height="2.7"/></g></svg><b>노란 조끼</b>를 입은 <b>학생 서포터즈</b>가 운영을 도와줘요</div>
       </div>
       <div class="brand"><b>혜원여자중학교</b><br>문의 · 4층 3학년부 김진호 선생님<br>찾아오거나 밴드 개인톡</div>
     </div>
