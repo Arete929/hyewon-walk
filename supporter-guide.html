@@ -13,7 +13,7 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Malgun Gothic',sans-serif;color:var(--t);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   @page{size:A4 portrait;margin:0;}
-  .page{width:210mm;min-height:297mm;background:#fff;padding:12mm 13mm 10mm;margin:0 auto;position:relative;page-break-after:always;overflow:hidden;}
+  .page{width:210mm;height:297mm;box-sizing:border-box;background:#fff;padding:12mm 13mm 10mm;margin:0 auto;position:relative;page-break-after:always;overflow:hidden;}
   .page:last-child{page-break-after:auto;}
 
   .hd{background:var(--grad);border-radius:16px;padding:16px 20px;color:#fff;position:relative;overflow:hidden;}
@@ -214,5 +214,104 @@
   <div class="foot"><span>혜원여중 · 아침걷기 챌린지</span><span>서포터즈 사용 설명서 · 2 / 2</span></div>
 </div>
 
+<script>
+/* AUTO-PAGINATE v1 — 내용이 A4(297mm)를 넘으면 자동으로 페이지를 나눠 잘리지 않게 한다.
+   블록(.step/.notice/.hd 등) 단위로 재배치하고 쪽 번호를 다시 매긴다. */
+(function(){
+  function px2mm(px){ return px * 25.4 / 96; }
+  // 블록 아래끝이 푸터 윗선을 침범하면 넘친 것으로 본다
+  function hits(el, foot){ return el.getBoundingClientRect().bottom > foot.getBoundingClientRect().top - 6; }
+
+  function unwrap(){
+    var ws = document.querySelectorAll('.sheetw');
+    for (var i = 0; i < ws.length; i++) {
+      var w = ws[i], p = w.querySelector('.page');
+      if (p) { p.style.transform = 'none'; w.parentNode.insertBefore(p, w); }
+      w.parentNode.removeChild(w);
+    }
+  }
+
+  function paginate(){
+    unwrap();
+    var pages = [].slice.call(document.querySelectorAll('.page'));
+    if (!pages.length) return;
+    var host = pages[0].parentNode;
+
+    // 원래 푸터 문구 수집 + 제목 추출
+    var lefts = [], title = '';
+    pages.forEach(function(p){
+      var f = p.querySelector('.foot');
+      if (!f) return;
+      var sp = f.querySelectorAll('span');
+      if (sp[0]) lefts.push(sp[0].innerHTML);
+      if (!title && sp[1]) title = sp[1].textContent.replace(/\s*[·]\s*\d+\s*\/\s*\d+\s*$/, '').trim();
+    });
+    if (!lefts.length) lefts = [''];
+
+    // 콘텐츠 블록만 순서대로 수거 (푸터 제외)
+    var blocks = [];
+    pages.forEach(function(p){
+      [].slice.call(p.children).forEach(function(c){
+        if (!c.classList.contains('foot')) blocks.push(c);
+      });
+    });
+
+    // 기존 페이지 제거
+    var anchor = document.createComment('pages');
+    host.insertBefore(anchor, pages[0]);
+    pages.forEach(function(p){ p.parentNode.removeChild(p); });
+
+    function newPage(){
+      var p = document.createElement('div');
+      p.className = 'page';
+      var f = document.createElement('div');
+      f.className = 'foot';
+      f.innerHTML = '<span></span><span></span>';
+      p.appendChild(f);
+      host.insertBefore(p, anchor);
+      return p;
+    }
+
+    var made = [], page = newPage(), foot = page.querySelector('.foot');
+    made.push(page);
+
+    blocks.forEach(function(b){
+      page.insertBefore(b, foot);
+      if (hits(b, foot)) {
+        // 이 페이지에 이미 다른 블록이 있으면 다음 장으로 넘긴다
+        if (page.children.length > 2) {
+          page.removeChild(b);
+          page = newPage(); foot = page.querySelector('.foot');
+          made.push(page);
+          page.insertBefore(b, foot);
+          // 단일 블록이 한 장을 넘으면 더 쪼갤 수 없음 → 경고만
+          if (hits(b, foot)) {
+            console.warn('[paginate] 블록 하나가 A4보다 큼:', px2mm(page.scrollHeight).toFixed(1) + 'mm', b.className);
+          }
+        }
+      }
+    });
+
+    host.removeChild(anchor);
+
+    // 쪽 번호 재기입
+    made.forEach(function(p, i){
+      var sp = p.querySelector('.foot').querySelectorAll('span');
+      sp[0].innerHTML = lefts[Math.min(i, lefts.length - 1)];
+      sp[1].textContent = (title ? title + ' · ' : '') + (i + 1) + ' / ' + made.length;
+    });
+
+    // 모바일 축소 스크립트(fit) 다시 실행
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  function start(){
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(paginate).catch(paginate);
+    else paginate();
+  }
+  if (document.readyState === 'complete') start();
+  else window.addEventListener('load', start);
+})();
+</script>
 <script>(function(){function fit(){var vw=document.documentElement.clientWidth;document.querySelectorAll(".page").forEach(function(pg){if(!pg.parentNode.classList||!pg.parentNode.classList.contains("sheetw")){var w=document.createElement("div");w.className="sheetw";pg.parentNode.insertBefore(w,pg);w.appendChild(pg);}var sh=pg.parentNode;pg.style.transformOrigin="top left";pg.style.transform="none";var pw=pg.offsetWidth,ph=pg.offsetHeight;var scale=Math.min(1,(vw-14)/pw);if(scale<1){pg.style.transform="scale("+scale+")";sh.style.width=(pw*scale)+"px";sh.style.height=(ph*scale)+"px";}else{sh.style.width="";sh.style.height="";}});}window.addEventListener("resize",fit);window.addEventListener("load",fit);fit();})();</script>
 </body></html>
