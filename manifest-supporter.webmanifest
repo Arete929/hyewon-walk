@@ -1,0 +1,17 @@
+{
+  "name": "아침걷기 챌린지 (서포터즈)",
+  "short_name": "걷기서포터",
+  "description": "혜원여중 아침걷기 챌린지 · 서포터즈용",
+  "start_url": "./supporter.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF8F2",
+  "theme_color": "#FF6A4A",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

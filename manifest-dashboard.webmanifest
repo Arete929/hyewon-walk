@@ -1,0 +1,16 @@
+{
+  "name": "아침걷기 챌린지 (순위)",
+  "short_name": "걷기순위",
+  "description": "혜원여중 아침걷기 챌린지 · 실시간 순위",
+  "start_url": "./dashboard.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#F0F2F5",
+  "theme_color": "#FF6A4A",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
