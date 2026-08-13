@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.16.2 · 2026-08-13
-     수정요약: 로그인 예시 고정(학번 3277·비번 숨김) + 홈 화면 바로가기 버튼 -->
+<!-- ▣ index.html · 학생 앱 · v2.28.2 · 2026-08-13
+     수정요약: 내가 올린 운동 사진 보기(오늘탭·누적달력) + API 응답 재시도 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -146,6 +146,22 @@
   .mcell .wx .wxi,.wxi{width:13px;height:13px;object-fit:contain;display:block;}
   .tabbar button .ti img{width:22px;height:22px;object-fit:contain;display:block;}
   .tile.ico{background:#FFF6EF;} .tile img{width:42px;height:42px;object-fit:contain;}
+
+  /* PHOTO-VIEW v1 — 내가 올린 사진 보기 */
+  .myphoto{margin-top:12px;border-top:1px dashed var(--div);padding-top:11px;}
+  .myphoto .ph-h{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:800;color:var(--m3);margin-bottom:8px;}
+  .myphoto .ph-b{display:flex;justify-content:center;}
+  .myphoto img{max-width:100%;max-height:170px;border-radius:12px;box-shadow:0 6px 16px -10px rgba(0,0,0,.45);cursor:pointer;display:block;}
+  .myphoto .ph-msg{font-size:12px;color:var(--m2);text-align:center;padding:8px 0;}
+  .ph-mini{width:15px;height:15px;vertical-align:-3px;margin-right:3px;}
+  .mcell.hasph{cursor:pointer;}
+  .mcell .cam{position:absolute;top:2px;right:3px;font-size:9px;line-height:1;}
+  .mcell{position:relative;}
+  .lbox{position:fixed;inset:0;z-index:100000;background:rgba(20,14,10,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;}
+  .lbox img{max-width:100%;max-height:78vh;border-radius:12px;box-shadow:0 20px 50px -20px rgba(0,0,0,.8);}
+  .lbox .cap{color:#FFE9DC;font-size:13px;font-weight:700;margin-top:12px;text-align:center;line-height:1.6;}
+  .lbox .x{position:absolute;top:14px;right:16px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:800;cursor:pointer;}
+  .lbox .ld{color:#FFE9DC;font-size:14px;font-weight:700;}
   .btn-ic{width:20px;height:20px;object-fit:contain;vertical-align:-4px;margin-right:3px;}
   .badge-ic{width:18px;height:18px;object-fit:contain;vertical-align:-3px;margin-right:3px;}
   .medal-img{width:24px;height:24px;object-fit:contain;vertical-align:middle;}
@@ -259,8 +275,8 @@
 <script>
 /* [PWA] GAS API와 fetch 통신 — google.script.run 인터페이스 유지 */
 var API_BASE='https://script.google.com/macros/s/AKfycby_havXeiD6E9PkN3do6WE4wF6OhcM5XotBrPovh85GSrJxHE3jo0R1bx0LBUg1CVeZ/exec';
-function apiCall(fn,args){return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,token:localStorage.getItem('achim_token')||'',args:args||[]})}).then(function(r){return r.json();}).then(function(res){if(res&&res.token)localStorage.setItem('achim_token',res.token);return res;});}
-function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
+function apiCall(fn,args,__apiTry){__apiTry=__apiTry||1;return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,token:localStorage.getItem('achim_token')||'',args:args||[]})}).then(function(r){return r.text();}).then(function(txt){var res;try{res=JSON.parse(txt);}catch(e){/* 구글이 JSON 대신 HTML을 준 경우 — 잠깐 쉬고 재시도 */if(__apiTry<3){return new Promise(function(ok){setTimeout(ok,600*__apiTry);}).then(function(){return apiCall(fn,args,__apiTry+1);});}throw new Error('서버 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');}if(res&&res.token)localStorage.setItem('achim_token',res.token);return res;});}
+function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
 window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
 
 var ST={ no:'', name:'', grade:0, classNo:0, qr:(new URLSearchParams(location.search).get('qr')||''), qrToken:(new URLSearchParams(location.search).get('t')||''), nrcB64:'', nrcMime:'', today:null, summary:null, dash:null, scope:'ind', gradeFilter:0 };
@@ -289,12 +305,75 @@ function loadHome(){
   $('hm-body').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
   google.script.run.withSuccessHandler(function(d){ST.today=d;renderHome(d);}).withFailureHandler(function(){$('hm-body').innerHTML='<p class="center muted" style="padding:30px;">불러오기 실패</p>';}).getMyToday(ST.no);
 }
+
+/* PHOTO-VIEW v1 — 내가 올린 아침 운동 사진 (오늘 탭 + 누적 달력) */
+var PHOTO_CACHE = {};
+
+function phLightbox(html){
+  var o = document.createElement('div');
+  o.className = 'lbox';
+  o.innerHTML = '<button type="button" class="x">✕</button>' + html;
+  o.querySelector('.x').onclick = function(){ o.remove(); };
+  o.onclick = function(e){ if (e.target === o) o.remove(); };
+  document.body.appendChild(o);
+  return o;
+}
+
+/* 크게 보기 — 원본을 받아온다 */
+function openMyPhoto(day){
+  var box = phLightbox('<div class="ld">사진 불러오는 중…</div>');
+  google.script.run.withSuccessHandler(function(r){
+    if (!box.isConnected) return;
+    if (r && r.ok) {
+      var meta = [];
+      if (r.km) meta.push(r.km + 'km');
+      if (r.time) meta.push(r.time);
+      if (r.pace) meta.push(r.pace);
+      box.innerHTML = '<button type="button" class="x">✕</button>'
+        + '<img src="' + r.dataUrl + '" alt="내가 올린 운동 사진">'
+        + '<div class="cap">' + day + '일차' + (meta.length ? ' · ' + meta.join(' · ') : '') + '</div>';
+    } else {
+      box.innerHTML = '<button type="button" class="x">✕</button><div class="ld">' + ((r && r.reason) || '사진을 불러오지 못했어요.') + '</div>';
+    }
+    box.querySelector('.x').onclick = function(){ box.remove(); };
+  }).withFailureHandler(function(){
+    if (!box.isConnected) return;
+    box.innerHTML = '<button type="button" class="x">✕</button><div class="ld">사진을 불러오지 못했어요.</div>';
+    box.querySelector('.x').onclick = function(){ box.remove(); };
+  }).getMyPhoto(ST.no, day, true);
+}
+
+/* 오늘 탭 카드 안 미리보기(썸네일) */
+function loadMyPhoto(day){
+  var el = document.getElementById('hm-photo-b');
+  if (!el) return;
+  if (PHOTO_CACHE[day]) { paintMyPhoto(PHOTO_CACHE[day], day); return; }
+  el.innerHTML = '<div class="ph-msg">사진 불러오는 중…</div>';
+  google.script.run.withSuccessHandler(function(r){
+    PHOTO_CACHE[day] = r;
+    paintMyPhoto(r, day);
+  }).withFailureHandler(function(){
+    var e2 = document.getElementById('hm-photo-b');
+    if (e2) e2.innerHTML = '<div class="ph-msg">사진을 불러오지 못했어요.</div>';
+  }).getMyPhoto(ST.no, day, false);
+}
+
+function paintMyPhoto(r, day){
+  var el = document.getElementById('hm-photo-b');
+  if (!el) return;
+  if (r && r.ok) {
+    el.innerHTML = '<img src="' + r.dataUrl + '" alt="내가 올린 운동 사진" onclick="openMyPhoto(' + day + ')">';
+  } else {
+    el.innerHTML = '<div class="ph-msg">' + ((r && r.reason) || '사진이 없어요.') + '</div>';
+  }
+}
+
 function renderHome(d){
   $('hm-day').textContent='DAY '+(d.day||'-');
   var ms=d.morning.status, done=ms==='approved';
   var runBadge=done?'<span class="pill pill-done">인증 완료 ✓</span>':'<span class="pill pill-wait">미제출</span>';
   var runCta=done
-    ? '<div class="center muted" style="font-size:13px;margin-top:12px;">오늘의 러닝 인증 완료! 🎉'+(d.morning.km?' · '+d.morning.km+'km':'')+'</div>'
+    ? '<div class="center muted" style="font-size:13px;margin-top:12px;">오늘의 러닝 인증 완료! 🎉'+(d.morning.km?' · '+d.morning.km+'km':'')+'</div>'+'<div class="myphoto"><div class="ph-h"><span>📷 내가 올린 사진</span><span style="font-weight:600;color:var(--m2);">눌러서 크게 보기</span></div><div class="ph-b" id="hm-photo-b"></div></div>'
     : '<button class="btn btn-cta" style="margin-top:14px;" onclick="go(\'nrc\')"><img class="btn-ic" src="https://arete929.github.io/hyewon-walk/icons/photo.png">러닝 사진 제출</button>';
   var steps=(d.lunch&&d.lunch.steps)||0, goal=10000, pct=Math.min(100,Math.round(steps/goal*100));
   var lunchInfo=steps?('<div class="t2">'+steps.toLocaleString()+'보 / '+((d.lunch.km!=null)?d.lunch.km:Math.round(steps*0.7)/1000)+'km</div>'):'<div class="t2">아직 기록 없음</div>';
@@ -304,6 +383,7 @@ function renderHome(d){
     '<div class="card"><div class="mcard"><div class="tile walk ico"><img src="https://arete929.github.io/hyewon-walk/icons/walk.png"></div><div class="mid"><div class="t1">점심 만보기</div>'+lunchInfo+'</div></div>'+
       '<div class="gauge"><i style="width:'+pct+'%"></i></div><div class="t2" style="margin-top:6px;color:var(--m);font-size:12px;">목표 '+goal.toLocaleString()+'보 · '+pct+'%</div></div>'+
     '<div class="stat-row"><div class="stat grad"><div class="v">'+(d.day||'-')+'</div><div class="l">현재 일차</div></div><div class="stat white"><div class="v">'+(steps?'O':'-')+'</div><div class="l">점심 만보기</div></div></div>';
+  if(done && d.day) loadMyPhoto(d.day);
 }
 
 /* ── NRC 업로드 ── */
@@ -394,7 +474,8 @@ function renderCum(d){
       '<div class="goal"><span class="gl">🚶 점심 만보기</span><span class="gv">'+(d.lunchDays||0)+'일</span></div>'+
     '</div></div></div>';
 
-  var WMAP={해:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-sun.png">',비:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-rain.png">',외출:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-out.png">',안함:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-no.png">'};var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather}; });
+  var WMAP={해:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-sun.png">',비:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-rain.png">',외출:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-out.png">',안함:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-no.png">'};var PHSET={}; (d.photoDays||[]).forEach(function(n){PHSET[n]=1;});
+  var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather,d:x.day}; });
   var rs=d.startDate||'', re=d.endDate||'', today=d.today||'';
   var W=['일','월','화','수','목','금','토'];
   function pad(n){return (n<10?'0':'')+n;}
@@ -412,7 +493,8 @@ function renderCum(d){
       var iso=isoD(cur), inR=(iso>=rs&&iso<=re), info=map[iso], isT=(iso===today);
       var dots=''; if(info){ if(info.m)dots+='<span class="dot m"></span>'; if(info.l)dots+='<span class="dot l"></span>'; }
       var wx=(info&&info.w&&WMAP[info.w])?('<span class="wx">'+WMAP[info.w]+'</span>'):'';
-      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+'">'+wx+'<span>'+cur.getDate()+'</span><span class="dots">'+dots+'</span></div>';
+      var hasPh=!!(info&&info.d&&PHSET[info.d]);
+      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+(hasPh?' hasph':'')+'"'+(hasPh?(' onclick="openMyPhoto('+info.d+')" title="사진 보기"'):'')+'>'+wx+(hasPh?'<span class="cam">📷</span>':'')+'<span>'+cur.getDate()+'</span><span class="dots">'+dots+'</span></div>';
       cur.setDate(cur.getDate()+1);
     }
     calInner='<div class="mcal-title">'+title+'</div>'+head+'<div class="mcal">'+cells+'</div>';
