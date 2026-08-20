@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ duty.html · 서포터즈 근무표(공유/열람·PWA) · v2.32.0 · 2026-08-20 -->
+<!-- ▣ duty.html · 서포터즈 근무표(공유/열람·PWA) · v2.33.0 · 2026-08-20 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -21,6 +21,17 @@
   .hero .b{font-size:22px;font-weight:800;margin-top:5px;}
   .hero .cnt{font-size:12px;opacity:.95;margin-top:5px;font-weight:700;}
   .bar{display:flex;gap:8px;align-items:center;margin:16px 0 12px;flex-wrap:wrap;}
+
+  /* PERSON-SORT v1 */
+  .pctl{background:#fff;border-radius:13px;padding:10px 12px;margin-bottom:10px;box-shadow:0 4px 14px -10px rgba(0,0,0,.25);}
+  .pctl .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .pctl .row + .row{margin-top:8px;}
+  .pctl .lb{font-size:11.5px;font-weight:800;color:var(--m);min-width:34px;}
+  .pbtn{border:1px solid #eee2d8;background:#fff;color:var(--m);border-radius:99px;padding:6px 12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .pbtn.on{background:var(--act);color:#fff;border-color:transparent;}
+  .pctl input.sch{flex:1;min-width:120px;border:1px solid #eee2d8;border-radius:10px;padding:7px 11px;font-size:13px;font-family:inherit;color:#4a423e;}
+  .pctl input.sch:focus{outline:none;border-color:var(--act);}
+  .pcount{font-size:11.5px;font-weight:700;color:#b0a097;margin:2px 2px 8px;}
   .seg{display:flex;background:#fff;border-radius:13px;padding:4px;box-shadow:0 4px 14px -10px rgba(0,0,0,.25);}
   .seg button{border:none;background:none;padding:9px 18px;border-radius:10px;font-size:14px;font-weight:800;color:var(--m);cursor:pointer;font-family:inherit;}
   .seg button.on{background:var(--act);color:#fff;}
@@ -87,6 +98,80 @@ window.onload=function(){
 };
 function setView(v){ VIEW=v; document.getElementById('tab-date').className=v==='date'?'on':''; document.getElementById('tab-person').className=v==='person'?'on':'';
   document.getElementById('view-date').style.display=v==='date'?'block':'none'; document.getElementById('view-person').style.display=v==='person'?'block':'none'; window.scrollTo(0,0); }
+
+/* PERSON-SORT v1 — 개인별 정렬·필터 */
+var PSORT = 'no', PGRADE = 0, PSLOT = 'all', PQ = '';
+
+function pSort(v){ PSORT = v; renderPerson(); }
+function pGrade(g){ PGRADE = g; renderPerson(); }
+function pSlot(s){ PSLOT = s; renderPerson(); }
+function pSearch(v){ PQ = String(v || '').trim(); renderPerson(); }
+
+function personControls(shown, total){
+  function b(on, fn, arg, label){
+    return '<button class="pbtn' + (on ? ' on' : '') + '" onclick="' + fn + '(' + arg + ')">' + label + '</button>';
+  }
+  var q = "'";
+  return '<div class="pctl">'
+    + '<div class="row"><span class="lb">정렬</span>'
+      + b(PSORT === 'no',    'pSort', q + 'no' + q,    '학번순')
+      + b(PSORT === 'name',  'pSort', q + 'name' + q,  '이름순')
+      + b(PSORT === 'count', 'pSort', q + 'count' + q, '근무 많은순')
+    + '</div>'
+    + '<div class="row"><span class="lb">학년</span>'
+      + b(PGRADE === 0, 'pGrade', 0, '전체')
+      + b(PGRADE === 1, 'pGrade', 1, '1학년')
+      + b(PGRADE === 2, 'pGrade', 2, '2학년')
+      + b(PGRADE === 3, 'pGrade', 3, '3학년')
+    + '</div>'
+    + '<div class="row"><span class="lb">시간</span>'
+      + b(PSLOT === 'all', 'pSlot', q + 'all' + q, '전체')
+      + b(PSLOT === 'am',  'pSlot', q + 'am' + q,  '🌅 아침')
+      + b(PSLOT === 'pm',  'pSlot', q + 'pm' + q,  '🌞 점심')
+      + b(PSLOT === 'none','pSlot', q + 'none' + q,'미배정')
+    + '</div>'
+    + '<div class="row"><span class="lb">검색</span>'
+      + '<input class="sch" type="search" placeholder="학번 또는 이름" value="' + esc(PQ) + '" oninput="pSearch(this.value)">'
+    + '</div>'
+    + '</div>'
+    + '<div class="pcount">' + shown + '명 표시' + (shown !== total ? ' (전체 ' + total + '명)' : '') + '</div>';
+}
+
+function personList(){
+  var list = (D && D.people ? D.people.slice() : []);
+  var total = list.length;
+  // 필터
+  if (PGRADE) list = list.filter(function(p){ return Number(String(p.no || '').charAt(0)) === PGRADE; });
+  if (PSLOT === 'am')   list = list.filter(function(p){ return (p.shifts || []).some(function(s){ return s.slot === '아침'; }); });
+  if (PSLOT === 'pm')   list = list.filter(function(p){ return (p.shifts || []).some(function(s){ return s.slot === '점심'; }); });
+  if (PSLOT === 'none') list = list.filter(function(p){ return !(p.shifts || []).length; });
+  if (PQ) {
+    var q = PQ.toLowerCase();
+    list = list.filter(function(p){ return ((p.no || '') + ' ' + (p.name || '')).toLowerCase().indexOf(q) >= 0; });
+  }
+  // 정렬
+  if (PSORT === 'no')         list.sort(function(a,b){ return String(a.no).localeCompare(String(b.no)); });
+  else if (PSORT === 'name')  list.sort(function(a,b){ return String(a.name || '').localeCompare(String(b.name || ''), 'ko'); });
+  else if (PSORT === 'count') list.sort(function(a,b){ return (b.count || 0) - (a.count || 0) || String(a.no).localeCompare(String(b.no)); });
+  return { list: list, total: total };
+}
+
+function renderPerson(){
+  var el = document.getElementById('view-person');
+  if (!el || !D) return;
+  var r = personList();
+  var cards = r.list.map(function(p){
+    var chips = p.shifts && p.shifts.length
+      ? p.shifts.map(function(s){ var am = s.slot === '아침'; return '<span class="chip ' + (am ? 'am' : 'pm') + '">' + esc(s.md) + '(' + esc(s.wd) + ') ' + (am ? '🌅' : '🌞') + s.slot + '</span>'; }).join('')
+      : '<span class="empty">배정된 근무가 없어요</span>';
+    return '<div class="pcard"><div class="pn">' + dnm(p) + '<span class="pc">' + (p.count || 0) + '회</span></div><div style="margin-top:7px;">' + chips + '</div></div>';
+  }).join('');
+  var body = r.list.length
+    ? '<div class="card" style="padding:2px;">' + cards + '</div>'
+    : '<div class="card" style="padding:26px;text-align:center;color:#bbb;">조건에 맞는 서포터가 없어요.</div>';
+  el.innerHTML = personControls(r.list.length, r.total) + body;
+}
+
 function render(){
   document.getElementById('loading').style.display='none';
   document.getElementById('main').style.display='block';
@@ -98,12 +183,9 @@ function render(){
     return '<tr><td class="dcol">'+esc(day.md)+'<br><span style="font-weight:600;color:#b0a097;">('+esc(day.wd)+')</span></td><td>'+am+'</td><td>'+pm+'</td></tr>';
   }).join('');
   document.getElementById('view-date').innerHTML=(D.days&&D.days.length)?'<div class="card"><table><thead><tr><th>날짜</th><th>🌅 아침</th><th>🌞 점심</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="card" style="padding:26px;text-align:center;color:#bbb;">아직 근무표가 없어요.</div>';
-  // 개인별
-  var pcards=(D.people||[]).map(function(p){
-    var chips=p.shifts&&p.shifts.length?p.shifts.map(function(s){var am=s.slot==='아침';return '<span class="chip '+(am?'am':'pm')+'">'+esc(s.md)+'('+esc(s.wd)+') '+(am?'🌅':'🌞')+s.slot+'</span>';}).join(''):'<span class="empty">배정된 근무가 없어요</span>';
-    return '<div class="pcard"><div class="pn">'+dnm(p)+'<span class="pc">'+ (p.count||0) +'회</span></div><div style="margin-top:7px;">'+chips+'</div></div>';
-  }).join('');
-  document.getElementById('view-person').innerHTML=(D.people&&D.people.length)?'<div class="card" style="padding:2px;">'+pcards+'</div>':'<div class="card" style="padding:26px;text-align:center;color:#bbb;">등록 서포터가 없어요.</div>';
+  // 개인별 — 정렬·필터는 renderPerson() 이 담당
+  renderPerson();
+
   document.getElementById('foot').textContent='혜원여중 · 아침걷기 챌린지 서포터즈 근무표';
 }
 function printSignSheet(){
