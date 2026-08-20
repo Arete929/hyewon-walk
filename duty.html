@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!-- ▣ duty.html · 서포터즈 근무표(공유/열람·PWA) · v2.32.0 · 2026-08-20 -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FF6A4A">
+<link rel="manifest" href="manifest-duty.webmanifest">
+<link rel="apple-touch-icon" href="icon-180-duty.png">
+<title>서포터즈 근무표 | 아침걷기 챌린지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+<style>
+  :root{ --act:linear-gradient(135deg,#FFA94E,#FF5B6B); --coral:#FF6B4A; --am:linear-gradient(135deg,#FFC93C,#FF9E3D); --pm:linear-gradient(135deg,#7FB4FF,#5B8DEF);
+    --bg:#FFF7F0; --card:#fff; --t:#4A3530; --m:#a98577; --line:#F3E3D6; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Malgun Gothic',sans-serif;background:var(--bg);color:var(--t);}
+  .wrap{max-width:820px;margin:0 auto;padding:0 14px 40px;}
+  .hero{background:var(--act);color:#fff;border-radius:0 0 22px 22px;padding:20px 20px 18px;text-align:center;position:relative;}
+  .hero .s{font-size:12px;font-weight:800;opacity:.95;}
+  .hero .b{font-size:22px;font-weight:800;margin-top:5px;}
+  .hero .cnt{font-size:12px;opacity:.95;margin-top:5px;font-weight:700;}
+  .bar{display:flex;gap:8px;align-items:center;margin:16px 0 12px;flex-wrap:wrap;}
+  .seg{display:flex;background:#fff;border-radius:13px;padding:4px;box-shadow:0 4px 14px -10px rgba(0,0,0,.25);}
+  .seg button{border:none;background:none;padding:9px 18px;border-radius:10px;font-size:14px;font-weight:800;color:var(--m);cursor:pointer;font-family:inherit;}
+  .seg button.on{background:var(--act);color:#fff;}
+  .print{margin-left:auto;background:#fff;border:1px solid var(--line);color:var(--coral);border-radius:11px;padding:9px 15px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .card{background:var(--card);border-radius:16px;padding:6px;box-shadow:0 8px 22px -16px rgba(0,0,0,.3);overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{border:1px solid var(--line);padding:9px 10px;vertical-align:top;text-align:left;}
+  th{background:#FFF1E6;font-weight:800;font-size:13px;}
+  .dcol{white-space:nowrap;font-weight:800;width:92px;text-align:center;}
+  .chip{display:inline-block;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:800;color:#fff;margin:2px 4px 2px 0;}
+  .chip.am{background:var(--am);} .chip.pm{background:var(--pm);}
+  .nm-chip{display:inline-block;background:#FFF1E6;color:#8a5a3a;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:700;margin:2px 5px 2px 0;}
+  .pcard{border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin:9px;}
+  .pcard .pn{font-size:15px;font-weight:800;} .pcard .pc{font-size:12px;color:var(--m);font-weight:700;margin-left:6px;}
+  .empty{color:#bbb;font-size:12px;}
+  #loading{text-align:center;padding:80px 20px;color:var(--m);font-weight:700;}
+  .spin{width:32px;height:32px;border:3px solid #FFE0CC;border-top-color:var(--coral);border-radius:50%;margin:0 auto 14px;animation:sp .8s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .foot{text-align:center;font-size:11px;color:#c9a594;font-weight:700;margin-top:20px;}
+  @media print{ body{background:#fff;} .hero{border-radius:0;} .bar{display:none;} .card{box-shadow:none;} .view{display:block!important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="s">🦺 2026 아침걷기 챌린지</div>
+    <div class="b">서포터즈 근무표</div>
+    <div class="cnt" id="hcnt"></div>
+  </div>
+
+  <div id="loading"><div class="spin"></div>근무표를 불러오는 중…</div>
+
+  <div id="main" style="display:none;">
+    <div class="bar">
+      <div class="seg"><button id="tab-date" class="on" onclick="setView('date')">📅 날짜별</button><button id="tab-person" onclick="setView('person')">🙋 개인별</button></div>
+      <button class="print" style="background:#EAF7EE;border-color:#BFE6CC;color:#1E7A46;" onclick="printLunchSheet()">📝 점심 기록지</button>
+      <button class="print" style="margin-left:8px;background:#FFF3E0;border-color:#FBD9A8;color:#B5740A;" onclick="printSignSheet()">✍️ 서명부</button>
+      <button class="print" style="margin-left:8px;" onclick="window.print()">🖨 인쇄 / PDF</button>
+    </div>
+    <div id="view-date" class="view"></div>
+    <div id="view-person" class="view" style="display:none;"></div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* [PWA] GAS API와 fetch 통신 — google.script.run 인터페이스 유지 */
+var API_BASE='https://script.google.com/macros/s/AKfycby_havXeiD6E9PkN3do6WE4wF6OhcM5XotBrPovh85GSrJxHE3jo0R1bx0LBUg1CVeZ/exec';
+function apiCall(fn,args,__apiTry){__apiTry=__apiTry||1;return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,args:args||[]})}).then(function(r){return r.text();}).then(function(txt){var res;try{res=JSON.parse(txt);}catch(e){if(__apiTry<3){return new Promise(function(ok){setTimeout(ok,600*__apiTry);}).then(function(){return apiCall(fn,args,__apiTry+1);});}throw new Error('서버 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');}return res;});}
+function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['getRosterView'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
+window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
+</script>
+<script>
+var D=null, VIEW='date';
+/* [v2.31] 근무표 칩·카드를 "학번 이름"으로 (관리자 dutyName 과 동일) */
+function dnm(p){ return esc(((p.no||'')+' '+(p.name||'')).trim()); }
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+window.onload=function(){
+  google.script.run.withSuccessHandler(function(d){
+    if(!d||!d.ok){document.getElementById('loading').innerHTML='근무표를 불러오지 못했어요.';return;}
+    D=d; render();
+  }).withFailureHandler(function(e){document.getElementById('loading').innerHTML='오류: '+e.message;}).getRosterView();
+};
+function setView(v){ VIEW=v; document.getElementById('tab-date').className=v==='date'?'on':''; document.getElementById('tab-person').className=v==='person'?'on':'';
+  document.getElementById('view-date').style.display=v==='date'?'block':'none'; document.getElementById('view-person').style.display=v==='person'?'block':'none'; window.scrollTo(0,0); }
+function render(){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('main').style.display='block';
+  document.getElementById('hcnt').textContent='등록 서포터 '+(D.poolCount||0)+'명'+(D.target?' · 목표 '+D.target+'회':'');
+  // 날짜별
+  var rows=(D.days||[]).map(function(day){
+    var am=day.am.length?day.am.map(function(p){return '<span class="nm-chip">'+dnm(p)+'</span>';}).join(''):'<span class="empty">-</span>';
+    var pm=day.pm.length?day.pm.map(function(p){return '<span class="nm-chip">'+dnm(p)+'</span>';}).join(''):'<span class="empty">-</span>';
+    return '<tr><td class="dcol">'+esc(day.md)+'<br><span style="font-weight:600;color:#b0a097;">('+esc(day.wd)+')</span></td><td>'+am+'</td><td>'+pm+'</td></tr>';
+  }).join('');
+  document.getElementById('view-date').innerHTML=(D.days&&D.days.length)?'<div class="card"><table><thead><tr><th>날짜</th><th>🌅 아침</th><th>🌞 점심</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="card" style="padding:26px;text-align:center;color:#bbb;">아직 근무표가 없어요.</div>';
+  // 개인별
+  var pcards=(D.people||[]).map(function(p){
+    var chips=p.shifts&&p.shifts.length?p.shifts.map(function(s){var am=s.slot==='아침';return '<span class="chip '+(am?'am':'pm')+'">'+esc(s.md)+'('+esc(s.wd)+') '+(am?'🌅':'🌞')+s.slot+'</span>';}).join(''):'<span class="empty">배정된 근무가 없어요</span>';
+    return '<div class="pcard"><div class="pn">'+dnm(p)+'<span class="pc">'+ (p.count||0) +'회</span></div><div style="margin-top:7px;">'+chips+'</div></div>';
+  }).join('');
+  document.getElementById('view-person').innerHTML=(D.people&&D.people.length)?'<div class="card" style="padding:2px;">'+pcards+'</div>':'<div class="card" style="padding:26px;text-align:center;color:#bbb;">등록 서포터가 없어요.</div>';
+  document.getElementById('foot').textContent='혜원여중 · 아침걷기 챌린지 서포터즈 근무표';
+}
+function printSignSheet(){
+  if(!D||!D.days){alert('근무표가 없어요.');return;}
+  var W=window.open('','_blank'); if(!W){alert('팝업이 차단됐어요. 팝업 허용 후 다시 시도하세요.');return;}
+  W.document.write(buildSignSheet(D.days, esc, (D&&D.challengeName)||'')); W.document.close(); W.focus();
+}
+function printLunchSheet(){
+  var W=window.open('','_blank'); if(!W){alert('팝업이 차단됐어요. 팝업 허용 후 다시 시도하세요.');return;}
+  W.document.write(buildLunchSheet(esc, (D&&D.challengeName)||'')); W.document.close(); W.focus();
+}
+function buildLunchSheet(escFn, cname){
+  var title=escFn((cname||'2026 아침시간 함께걷기 챌린지')+' 점심 기록지');
+  var ROWS=20;
+  var thead='<thead><tr><th class="c-no">번호</th><th class="c-sn">학번</th><th class="c-nm">이름</th><th class="c-gu">구분 (해당 체크)</th><th class="c-pn">만보기 번호</th><th class="c-st">걸음수</th><th class="c-km">거리(km)</th></tr></thead>';
+  var stat='<tr class="stat"><td colspan="7">📊 <b>합계</b> &nbsp; 만보기 <u>______</u> 명 &nbsp;·&nbsp; 개인장비 <u>______</u> 명 &nbsp;·&nbsp; 총 <u>______</u> 명</td></tr>';
+  function rowsHtml(numbered){ var out=''; for(var i=1;i<=ROWS;i++){ var g=(i%5===0)?' class="g5"':''; out+='<tr'+g+'><td class="no">'+(numbered?i:'')+'</td><td></td><td></td><td class="gu">☐ 만보기 &nbsp; ☐ 개인장비</td><td></td><td></td><td></td></tr>'; } return out; }
+  function page(numbered,pno){ return '<div class="page"><div class="phdr"><h2>'+title+'</h2>'
+    +'<div class="sub">점심 활동 후 서포터즈가 기록해요. · <b>만보기</b>=번호·걸음수 / <b>개인장비</b>(스마트워치·디벗)=거리(km)'+(numbered?'':' &nbsp;·&nbsp; <b>추가용</b> — 여러 장 복사해 쓰세요')+'</div>'
+    +'<div class="meta"><span>날짜 <u>________</u></span><span>학급·장소 <u>____________</u></span><span>기록 서포터즈 <u>____________</u></span></div></div>'
+    +'<table>'+thead+'<tbody>'+rowsHtml(numbered)+stat+'</tbody></table>'
+    +'<div class="pfoot">'+pno+'쪽 중 2쪽 · 혜원여중 아침걷기 챌린지</div></div>'; }
+  var body=page(true,1)+page(false,2);
+  var css='@page{size:A4 portrait;margin:0;}*{box-sizing:border-box;}'
+    +'body{font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,"Malgun Gothic",sans-serif;color:#222;margin:0;-webkit-font-smoothing:antialiased;}'
+    +'.page{width:210mm;min-height:297mm;padding:12mm 10mm 14mm;position:relative;page-break-after:always;}.page:last-child{page-break-after:auto;}'
+    +'.phdr h2{color:#1E7A46;margin:0 0 3px;font-size:19px;font-weight:900;letter-spacing:-.4px;}'
+    +'.phdr .sub{color:#888;font-size:11.5px;font-weight:500;margin-bottom:8px;}'
+    +'.meta{font-size:12px;font-weight:700;color:#444;margin-bottom:9px;}.meta span{display:inline-block;margin-right:22px;}.meta u{color:#bbb;font-weight:400;}'
+    +'table{width:100%;border-collapse:collapse;table-layout:fixed;}'
+    +'th,td{border:1px solid #999;padding:0 6px;font-size:12.5px;height:36px;text-align:center;}'
+    +'th{background:#EAF7EE;font-weight:800;font-size:11.5px;height:28px;}'
+    +'td.no{color:#999;font-size:11px;}td.gu{text-align:left;font-size:11px;white-space:nowrap;}'
+    +'tr.g5 td{border-bottom:2px solid #555;}'
+    +'tr.stat td{background:#F4FBF6;text-align:left;font-size:12.5px;height:34px;font-weight:700;}tr.stat u{color:#bbb;font-weight:400;}'
+    +'.pfoot{position:absolute;left:10mm;right:10mm;bottom:7mm;text-align:center;font-size:11px;color:#999;font-weight:500;}'
+    +'.c-no{width:6%;}.c-sn{width:12%;}.c-nm{width:13%;}.c-gu{width:24%;}.c-pn{width:15%;}.c-st{width:15%;}.c-km{width:15%;}'
+    +'@media screen{body{background:#e9e9ee;padding:16px 0;}.page{background:#fff;margin:0 auto 16px;box-shadow:0 4px 16px rgba(0,0,0,.2);}}';
+  var s='(function(){setTimeout(function(){window.print();},(document.fonts&&document.fonts.status==="loaded")?250:550);})();';
+  return '<html><head><meta charset="utf-8"><title>'+title+'</title>'
+    +'<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">'
+    +'<style>'+css+'</style></head><body>'+body+'<'+'script>'+s+'<'+'/script></body></html>';
+}
+function buildSignSheet(days, escFn, cname){
+  days=days||[];
+  var nm=function(p){return escFn(((p.no||'')+' '+(p.name||'')).trim());};
+  var title=escFn((cname||'2026 아침시간 함께걷기 챌린지')+' 서포터즈 활동 확인서');
+  var titleJs=title.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  var tile=function(p){return '<div class="ent"><div class="el">'+nm(p)+'</div><div class="hint">(정자 서명)</div></div>';};
+  var block=function(cls,label,arr){var t=arr.length?arr.map(tile).join(''):'<div class="none">배정 없음</div>';return '<div class="slot '+cls+'"><div class="sh">'+label+' ('+arr.length+'명)</div><div class="tiles">'+t+'</div></div>';};
+  var secs=days.map(function(day){
+    var am=day.am||[], pm=day.pm||[];
+    if(!am.length && !pm.length) return '';
+    return '<div class="day"><div class="dh">'+escFn(day.md)+' ('+escFn(day.wd)+')</div><div class="slots">'+block('am','🌅 아침',am)+block('pm','🌞 점심',pm)+'</div></div>';
+  }).filter(Boolean).join('');
+  if(!secs) secs='<div class="day"><div class="dh">배정된 근무가 없어요</div></div>';
+  var css='@page{size:A4;margin:0;}*{box-sizing:border-box;}'
+    +'body{font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,"Malgun Gothic",sans-serif;color:#222;margin:0;-webkit-font-smoothing:antialiased;}'
+    +'.page{width:210mm;min-height:297mm;padding:24mm 12mm 16mm;position:relative;page-break-after:always;}.page:last-child{page-break-after:auto;}'
+    +'.phdr h2{color:#E2502F;margin:0 0 3px;font-size:20px;font-weight:900;letter-spacing:-.4px;}.phdr .sub{color:#888;font-size:11.5px;font-weight:500;margin-bottom:12px;}'
+    +'.pfoot{position:absolute;left:12mm;right:12mm;bottom:9mm;text-align:center;font-size:11px;color:#999;font-weight:500;}'
+    +'.day{margin-bottom:11px;page-break-inside:avoid;}.dh{background:#FFE9D6;font-weight:800;font-size:13.5px;padding:5px 10px;border-radius:6px;margin-bottom:5px;}'
+    +'.slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;}'
+    +'.slot{border:1px solid #e4e4e4;border-radius:8px;padding:6px 7px 7px;}.slot.am{background:#FFFBF4;border-color:#F3E2C8;}.slot.pm{background:#F4F8FF;border-color:#D9E5F7;}'
+    +'.sh{font-weight:800;font-size:12.5px;margin-bottom:5px;}.slot.am .sh{color:#C77700;}.slot.pm .sh{color:#2C6FBF;}'
+    +'.tiles{display:flex;flex-direction:column;gap:5px;}'
+    +'.ent{position:relative;display:flex;align-items:center;border:1px solid #ccc;background:#fff;border-radius:6px;padding:6px 9px;min-height:42px;}.ent .el{font-size:11.5px;font-weight:700;color:#333;}'
+    +'.ent .hint{position:absolute;right:8px;bottom:4px;font-size:9px;color:#ccc;font-weight:500;}.none{color:#bbb;font-size:11px;padding:6px 4px;}'
+    +'@media screen{body{background:#e9e9ee;padding:16px 0;}.page{background:#fff;margin:0 auto 16px;box-shadow:0 4px 16px rgba(0,0,0,.2);}}';
+  var s='(function(){var HDR=\'<div class="phdr"><h2>'+titleJs+'</h2><div class="sub">해당 요일 아침·점심에 실제로 활동한 뒤 칸 안에 정자로 서명하세요. · 혜원여중</div></div>\';'
+    +'function run(){var pages=document.getElementById("pages"),src=document.getElementById("src");var secs=Array.prototype.slice.call(src.children);'
+    +'function np(){var pg=document.createElement("div");pg.className="page";pg.innerHTML=HDR+\'<div class="pbody"></div><div class="pfoot"></div>\';pages.appendChild(pg);return pg;}'
+    +'function mx(p){var cs=getComputedStyle(p);return p.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-p.querySelector(".phdr").offsetHeight-54;}'
+    +'var pg=np(),body=pg.querySelector(".pbody"),bm=mx(pg);'
+    +'secs.forEach(function(sec){body.appendChild(sec);if(body.offsetHeight>bm&&body.children.length>1){body.removeChild(sec);pg=np();body=pg.querySelector(".pbody");bm=mx(pg);body.appendChild(sec);}});'
+    +'src.parentNode.removeChild(src);var pgs=pages.querySelectorAll(".page"),N=pgs.length;'
+    +'for(var i=0;i<pgs.length;i++){pgs[i].querySelector(".pfoot").textContent=(i+1)+"쪽 중 "+N+"쪽 · 혜원여중 아침걷기 챌린지";}'
+    +'setTimeout(function(){window.print();},250);}'
+    +'if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){setTimeout(run,60);});}else{setTimeout(run,400);}})();';
+  return '<html><head><meta charset="utf-8"><title>'+title+'</title>'
+    +'<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">'
+    +'<style>'+css+'</style></head><body>'
+    +'<div id="src" style="position:absolute;visibility:hidden;left:-9999px;top:0;width:186mm;">'+secs+'</div><div id="pages"></div>'
+    +'<'+'script>'+s+'<'+'/script></body></html>';
+}
+</script>
+<script>
+(function(){ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');var rf=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(rf)return;rf=true;location.reload();});} })();
+</script>
+</body>
+</html>

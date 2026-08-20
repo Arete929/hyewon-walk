@@ -1,7 +1,7 @@
 /* 아침걷기 챌린지 PWA 서비스워커 | 버전 올리면 캐시 갱신·자동 새로고침 */
-var CACHE = 'achim-v1.15.0';
-var ASSETS = ['./', './index.html', './supporter.html', './teacher.html', './dashboard.html',
-  './manifest.webmanifest', './manifest-teacher.webmanifest', './manifest-supporter.webmanifest', './manifest-dashboard.webmanifest',
+var CACHE = 'achim-v1.16.0';
+var ASSETS = ['./', './index.html', './supporter.html', './teacher.html', './dashboard.html', './duty.html',
+  './manifest.webmanifest', './manifest-teacher.webmanifest', './manifest-supporter.webmanifest', './manifest-dashboard.webmanifest', './manifest-duty.webmanifest',
   './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {

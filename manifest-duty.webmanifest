@@ -1,0 +1,16 @@
+{
+  "name": "아침걷기 챌린지 (근무표)",
+  "short_name": "걷기근무표",
+  "description": "혜원여중 아침걷기 챌린지 · 서포터즈 근무표",
+  "start_url": "./duty.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF8F2",
+  "theme_color": "#FF6A4A",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192-duty.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-duty.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
