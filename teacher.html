@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ teacher.html · 교사 앱 · v2.17.0 · 2026-08-13
-     수정요약: 홈 화면 바로가기(설치) 버튼 + 전용 매니페스트 추가 -->
+<!-- ▣ teacher.html · 교사 앱 · v2.38.0 · 2026-08-13
+     수정요약: 교사도 아침·점심 모두 사진 인증 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -153,7 +153,7 @@
 
   <!-- 사진 업로드 -->
   <div id="s-nrc" class="screen">
-    <div class="nav"><button class="back" onclick="go('home')">←</button><h3>아침 운동 인증</h3></div>
+    <div class="nav"><button class="back" onclick="go('home')">←</button><h3 id="nrc-title">아침 운동 인증</h3></div>
     <p class="help">운동앱의 <b>운동 1건(걷기/러닝) 기록 화면</b>을 캡처해서 올려주세요. (삼성헬스·애플 피트니스·NRC·스트라바 등 · 거리 표시)</p>
     <img id="nrc-prev" class="preview" alt="">
     <div class="drop" id="drop" onclick="document.getElementById('nrc-file').click()"><div class="tile" style="background:#FFF6EF"><img src="https://arete929.github.io/hyewon-walk/icons/photo.png" style="width:42px;height:42px;object-fit:contain"></div><div class="d1">탭하여 사진 선택</div><div class="d2">JPG · PNG · 최대 10MB</div></div>
@@ -228,17 +228,40 @@ function loadHome(){
   google.script.run.withSuccessHandler(renderHome).withFailureHandler(function(){$('hm-body').innerHTML='<div class="card"><p class="muted">불러오기 실패</p></div>';}).getTeacherToday(T.name);
 }
 function renderHome(d){
+  /* TEACHER-LUNCH v1 — 교사도 아침·점심 각각 사진 인증 */
   $('hm-day').textContent='DAY '+(d.day||'-');
-  var done=d.morning.status==='approved';
-  var badge=done?'<span class="pill pill-done">인증 완료 ✓</span>':'<span class="pill pill-wait">미제출</span>';
-  var cta=done?'<div class="center muted" style="font-size:13px;margin-top:12px;">오늘 인증 완료! 🎉'+(d.morning.km?' · '+d.morning.km+'km':'')+'</div>':'<button class="btn btn-cta" style="margin-top:14px;" onclick="go(\'nrc\')"><img src="https://arete929.github.io/hyewon-walk/icons/photo.png" style="width:20px;height:20px;object-fit:contain;vertical-align:-4px;margin-right:3px">운동 사진 제출</button>';
+  var lunch=d.lunch||{status:'none'};
+  var mDone=d.morning.status==='approved', lDone=lunch.status==='approved';
+  function card(slot,title,desc,icon,bg,done,km){
+    var badge=done?'<span class="pill pill-done">인증 완료 ✓</span>':'<span class="pill pill-wait">미제출</span>';
+    var cta=done
+      ? '<div class="center muted" style="font-size:13px;margin-top:12px;">인증 완료! 🎉'+(km?' · '+km+'km':'')+'</div>'
+      : '<button class="btn btn-cta" style="margin-top:14px;" onclick="startUpload(\''+slot+'\')"><img src="https://arete929.github.io/hyewon-walk/icons/photo.png" style="width:20px;height:20px;object-fit:contain;vertical-align:-4px;margin-right:4px;">사진 제출</button>';
+    return '<div class="card"><div class="mcard"><div class="tile" style="background:'+bg+'"><img src="'+icon+'" style="width:42px;height:42px;object-fit:contain"></div>'
+      +'<div class="mid"><div class="t1">'+title+'</div><div class="t2">'+desc+'</div></div>'+badge+'</div>'+cta+'</div>';
+  }
   $('hm-body').innerHTML=
     '<div class="label">오늘의 미션</div>'+
-    '<div class="card"><div class="mcard"><div class="tile" style="background:#FFF6EF"><img src="https://arete929.github.io/hyewon-walk/icons/run.png" style="width:42px;height:42px;object-fit:contain"></div><div class="mid"><div class="t1">아침 운동</div><div class="t2">운동앱 기록 인증 (체크인 불필요)</div></div>'+badge+'</div>'+cta+'</div>'+
-    '<div class="stat-row"><div class="stat grad"><div class="v">'+(d.day||'-')+'</div><div class="l">현재 일차</div></div><div class="stat white"><div class="v">'+(done?'O':'-')+'</div><div class="l">오늘 인증</div></div></div>';
+    card('아침','아침 운동','운동앱 기록 인증 (NRC·삼성헬스 등)','https://arete929.github.io/hyewon-walk/icons/run.png','#FFF6EF',mDone,d.morning.km)+
+    card('점심','점심 운동','점심시간 걷기도 사진으로 인증','https://arete929.github.io/hyewon-walk/icons/walk.png','#EFF6FF',lDone,lunch.km)+
+    '<div class="stat-row"><div class="stat grad"><div class="v">'+(d.day||'-')+'</div><div class="l">현재 일차</div></div><div class="stat white"><div class="v">'+((mDone?1:0)+(lDone?1:0))+'/2</div><div class="l">오늘 인증</div></div></div>';
 }
 
-/* 업로드 */
+/* 업로드 — TEACHER-LUNCH v1: 어느 시간대인지 기억해서 제출 */
+var UP_SLOT='아침';
+function startUpload(slot){
+  UP_SLOT=(slot==='점심')?'점심':'아침';
+  var ttl=document.getElementById('nrc-title');
+  if(ttl) ttl.textContent=UP_SLOT+' 운동 인증';
+  T.nrcB64=''; T.nrcMime='';
+  var pv=document.getElementById('nrc-prev'); if(pv){pv.style.display='none';pv.src='';}
+  var dp=document.getElementById('drop'); if(dp)dp.style.display='';
+  var bt=document.getElementById('btn-nrc'); if(bt)bt.disabled=true;
+  var er=document.getElementById('nrc-err'); if(er)er.classList.remove('show');
+  var fi=document.getElementById('nrc-file'); if(fi)fi.value='';
+  go('nrc');
+}
+
 function previewNrc(input){var f=input.files[0];if(!f)return;var e=$('nrc-err');e.classList.remove('show');
   if(!f.type.startsWith('image/')){e.textContent='이미지 파일만 가능합니다.';e.classList.add('show');return;}
   if(f.size>10*1024*1024){e.textContent='10MB 이하만 가능합니다.';e.classList.add('show');return;}
@@ -246,7 +269,7 @@ function previewNrc(input){var f=input.files[0];if(!f)return;var e=$('nrc-err');
 function submitNrc(force){if(!T.nrcB64)return;var b=$('btn-nrc');b.disabled=true;b.textContent='분석 중…';
   google.script.run.withSuccessHandler(function(r){b.disabled=false;b.textContent='제출하기';
     if(r&&r.needConfirm){ if(confirm(r.reason+'\n\n다시 제출할까요?')){submitNrc(true);} return; }
-    renderResult(r);go('result');}).withFailureHandler(function(){b.disabled=false;b.textContent='제출하기';var e=$('nrc-err');e.textContent='제출 중 오류';e.classList.add('show');}).submitTeacherPhoto(T.name,T.nrcB64,T.nrcMime,'web',force===true);}
+    renderResult(r);go('result');}).withFailureHandler(function(){b.disabled=false;b.textContent='제출하기';var e=$('nrc-err');e.textContent='제출 중 오류';e.classList.add('show');}).submitTeacherPhoto(T.name,T.nrcB64,T.nrcMime,'web',force===true,UP_SLOT);}
 function renderResult(r){
   var ok=r.ok&&r.finalResult;
   if(!ok){var why=(r.reason||'')+((r.reasons&&r.reasons.length)?'\n'+r.reasons.join('\n'):'');
