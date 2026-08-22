@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.28.2 · 2026-08-13
-     수정요약: 내가 올린 운동 사진 보기(오늘탭·누적달력) + API 응답 재시도 -->
+<!-- ▣ index.html · 학생 앱 · v2.41.0 · 2026-08-13
+     수정요약: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -162,6 +162,23 @@
   .lbox .cap{color:#FFE9DC;font-size:13px;font-weight:700;margin-top:12px;text-align:center;line-height:1.6;}
   .lbox .x{position:absolute;top:14px;right:16px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:800;cursor:pointer;}
   .lbox .ld{color:#FFE9DC;font-size:14px;font-weight:700;}
+
+  /* DAY-DETAIL v1 */
+  .dsheet{position:fixed;inset:0;z-index:100001;background:rgba(30,20,14,.55);display:flex;align-items:flex-end;justify-content:center;}
+  .dsheet .box{background:#fff;width:100%;max-width:460px;border-radius:22px 22px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -12px 40px -14px rgba(0,0,0,.4);max-height:88vh;overflow-y:auto;}
+  .dsheet .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .dsheet .dt{font-size:17px;font-weight:800;color:var(--t);}
+  .dsheet .dy{font-size:12px;font-weight:800;color:#fff;background:var(--grad);border-radius:99px;padding:3px 10px;margin-left:7px;vertical-align:2px;}
+  .dsheet .x{width:34px;height:34px;border:none;border-radius:50%;background:#F3EDE8;color:#8A7468;font-size:16px;font-weight:800;cursor:pointer;}
+  .drow{display:flex;align-items:center;gap:11px;background:var(--inp);border-radius:14px;padding:12px 14px;margin-bottom:9px;}
+  .drow .ic{font-size:21px;width:26px;text-align:center;}
+  .drow .lb{flex:1;font-size:13.5px;font-weight:800;color:var(--m3);}
+  .drow .vl{font-size:16px;font-weight:800;color:var(--primary);}
+  .drow.off .vl{color:var(--m2);font-weight:700;font-size:13.5px;}
+  .dsheet .ph{margin-top:12px;text-align:center;}
+  .dsheet .ph img{max-width:100%;max-height:230px;border-radius:13px;box-shadow:0 6px 18px -10px rgba(0,0,0,.45);cursor:pointer;}
+  .dsheet .msg{font-size:12.5px;color:var(--m2);text-align:center;padding:8px 0;}
+  .mcell.inrange{cursor:pointer;}
   .btn-ic{width:20px;height:20px;object-fit:contain;vertical-align:-4px;margin-right:3px;}
   .badge-ic{width:18px;height:18px;object-fit:contain;vertical-align:-3px;margin-right:3px;}
   .medal-img{width:24px;height:24px;object-fit:contain;vertical-align:middle;}
@@ -368,6 +385,73 @@ function paintMyPhoto(r, day){
   }
 }
 
+
+/* DAY-DETAIL v1 — 달력 날짜별 상세(아침·점심 기록 + 사진) */
+function dayInfoOf(dayNum){
+  var arr = (ST.summary && ST.summary.days) || [];
+  for (var i=0;i<arr.length;i++) if (Number(arr[i].day) === Number(dayNum)) return arr[i];
+  return null;
+}
+function fmtDateK(iso){
+  if(!iso) return '';
+  var p = String(iso).split('-'); if(p.length<3) return iso;
+  var dt = new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
+  var w = ['일','월','화','수','목','금','토'][dt.getDay()];
+  return Number(p[1])+'월 '+Number(p[2])+'일 ('+w+')';
+}
+function openDay(dayNum){
+  var info = dayInfoOf(dayNum);
+  if(!info) return;
+  var mk = Number(info.morningKm)||0;
+  var ls = Number(info.lunchSteps)||0;
+  var lk = Number(info.lunchKm)||0;
+  var wx = info.weather ? (' · ' + info.weather) : '';
+
+  var mRow = mk>0
+    ? '<div class="drow"><span class="ic">🌅</span><span class="lb">아침 운동</span><span class="vl">'+mk+' km</span></div>'
+    : '<div class="drow off"><span class="ic">🌅</span><span class="lb">아침 운동</span><span class="vl">기록 없음</span></div>';
+  var lVal = ls>0 ? (ls.toLocaleString()+'보'+(lk>0?(' · '+lk+' km'):'')) : (lk>0 ? (lk+' km') : '');
+  var lRow = lVal
+    ? '<div class="drow"><span class="ic">🍚</span><span class="lb">점심 걷기</span><span class="vl">'+lVal+'</span></div>'
+    : '<div class="drow off"><span class="ic">🍚</span><span class="lb">점심 걷기</span><span class="vl">기록 없음</span></div>';
+
+  var o = document.createElement('div');
+  o.className='dsheet';
+  o.innerHTML = '<div class="box">'
+    + '<div class="hd"><div><span class="dt">'+fmtDateK(info.date)+'</span><span class="dy">'+dayNum+'일차</span></div>'
+    + '<button type="button" class="x">✕</button></div>'
+    + mRow + lRow
+    + (wx ? '<div class="msg">오늘의 상태'+wx+'</div>' : '')
+    + '<div class="ph" id="dsheet-ph"></div>'
+    + '</div>';
+  o.querySelector('.x').onclick=function(){ o.remove(); };
+  o.onclick=function(e){ if(e.target===o) o.remove(); };
+  document.body.appendChild(o);
+
+  // 사진이 있는 날이면 썸네일도 함께
+  var hasPhoto = (ST.summary && ST.summary.photoDays || []).indexOf(Number(dayNum)) >= 0;
+  var ph = document.getElementById('dsheet-ph');
+  if (!hasPhoto) { if(ph) ph.innerHTML = '<div class="msg">올린 사진이 없어요.</div>'; return; }
+  if (ph) ph.innerHTML = '<div class="msg">사진 불러오는 중…</div>';
+  if (PHOTO_CACHE[dayNum]) { paintDayPhoto(PHOTO_CACHE[dayNum], dayNum); return; }
+  google.script.run.withSuccessHandler(function(r){
+    PHOTO_CACHE[dayNum]=r; paintDayPhoto(r, dayNum);
+  }).withFailureHandler(function(){
+    var e2=document.getElementById('dsheet-ph'); if(e2) e2.innerHTML='<div class="msg">사진을 불러오지 못했어요.</div>';
+  }).getMyPhoto(ST.no, dayNum, false);
+}
+function paintDayPhoto(r, dayNum){
+  var ph = document.getElementById('dsheet-ph');
+  if(!ph) return;
+  if (r && r.ok) {
+    var meta=[]; if(r.time) meta.push('⏱ '+r.time); if(r.pace) meta.push('🏃 '+r.pace);
+    ph.innerHTML = '<img src="'+r.dataUrl+'" alt="운동 사진" onclick="openMyPhoto('+dayNum+')">'
+      + (meta.length ? '<div class="msg">'+meta.join(' · ')+' · 눌러서 크게 보기</div>' : '<div class="msg">눌러서 크게 보기</div>');
+  } else {
+    ph.innerHTML = '<div class="msg">'+((r&&r.reason)||'사진이 없어요.')+'</div>';
+  }
+}
+
 function renderHome(d){
   $('hm-day').textContent='DAY '+(d.day||'-');
   var ms=d.morning.status, done=ms==='approved';
@@ -475,7 +559,7 @@ function renderCum(d){
     '</div></div></div>';
 
   var WMAP={해:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-sun.png">',비:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-rain.png">',외출:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-out.png">',안함:'<img class="wxi" src="https://arete929.github.io/hyewon-walk/icons/w-no.png">'};var PHSET={}; (d.photoDays||[]).forEach(function(n){PHSET[n]=1;});
-  var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather,d:x.day}; });
+  var map={}; (d.days||[]).forEach(function(x){ if(x.date) map[x.date]={m:x.morning,l:x.lunch,w:x.weather,d:x.day,mk:x.morningKm,ls:x.lunchSteps,lk:x.lunchKm}; });
   var rs=d.startDate||'', re=d.endDate||'', today=d.today||'';
   var W=['일','월','화','수','목','금','토'];
   function pad(n){return (n<10?'0':'')+n;}
@@ -494,7 +578,8 @@ function renderCum(d){
       var dots=''; if(info){ if(info.m)dots+='<span class="dot m"></span>'; if(info.l)dots+='<span class="dot l"></span>'; }
       var wx=(info&&info.w&&WMAP[info.w])?('<span class="wx">'+WMAP[info.w]+'</span>'):'';
       var hasPh=!!(info&&info.d&&PHSET[info.d]);
-      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+(hasPh?' hasph':'')+'"'+(hasPh?(' onclick="openMyPhoto('+info.d+')" title="사진 보기"'):'')+'>'+wx+(hasPh?'<span class="cam">📷</span>':'')+'<span>'+cur.getDate()+'</span><span class="dots">'+dots+'</span></div>';
+      var canOpen=!!(inR&&info&&info.d);
+      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+(hasPh?' hasph':'')+'"'+(canOpen?(' onclick="openDay('+info.d+')" title="기록 보기"'):'')+'>'+wx+(hasPh?'<span class="cam">📷</span>':'')+'<span>'+cur.getDate()+'</span><span class="dots">'+dots+'</span></div>';
       cur.setDate(cur.getDate()+1);
     }
     calInner='<div class="mcal-title">'+title+'</div>'+head+'<div class="mcal">'+cells+'</div>';
