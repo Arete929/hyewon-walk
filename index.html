@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.49.0 · 2026-08-23
+<!-- ▣ index.html · 학생 앱 · v2.50.0 · 2026-08-23
      수정요약: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
 <head>
@@ -142,8 +142,11 @@
   .mcal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
   .mcal-head span{text-align:center;font-size:11px;font-weight:700;color:var(--m2);} .mcal-head .sun{color:#E5484D;} .mcal-head .sat{color:#3B82F6;}
   .mcal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-  .mcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:700;background:#F7F3EF;color:#C4B7AD;position:relative;} .mcell .wx{position:absolute;top:1px;right:3px;font-size:9px;line-height:1;}
-  .mcell .wx .wxi,.wxi{width:13px;height:13px;object-fit:contain;display:block;}
+  /* [v2.50] 배지(날씨·안함 / 카메라)를 날짜 위 한 줄에 나란히 — 겹침 제거 */
+  .mcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13px;font-weight:700;background:#F7F3EF;color:#C4B7AD;position:relative;padding:3px 0 2px;box-sizing:border-box;}
+  .mcell .mtop{display:flex;align-items:center;justify-content:center;gap:3px;height:13px;line-height:1;}
+  .mcell .wx{display:flex;align-items:center;line-height:1;}
+  .mcell .wx .wxi,.wxi{width:12px;height:12px;object-fit:contain;display:block;}
   .tabbar button .ti img{width:22px;height:22px;object-fit:contain;display:block;}
   .tile.ico{background:#FFF6EF;} .tile img{width:42px;height:42px;object-fit:contain;}
 
@@ -155,7 +158,8 @@
   .myphoto .ph-msg{font-size:12px;color:var(--m2);text-align:center;padding:8px 0;}
   .ph-mini{width:15px;height:15px;vertical-align:-3px;margin-right:3px;}
   .mcell.hasph{cursor:pointer;}
-  .mcell .cam{position:absolute;top:2px;right:3px;font-size:9px;line-height:1;}
+  .mcell .cam{font-size:10px;line-height:1;}
+  .mcell .mnum{line-height:1.15;}
   .mcell{position:relative;}
   .lbox{position:fixed;inset:0;z-index:100000;background:rgba(20,14,10,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;}
   .lbox img{max-width:100%;max-height:78vh;border-radius:12px;box-shadow:0 20px 50px -20px rgba(0,0,0,.8);}
@@ -718,7 +722,7 @@ function renderCum(d){
       var wx=(info&&info.w&&WMAP[info.w])?('<span class="wx">'+WMAP[info.w]+'</span>'):'';
       var hasPh=!!(info&&info.d&&PHSET[info.d]);
       var canOpen=!!(inR&&info&&info.d);
-      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+(hasPh?' hasph':'')+'"'+(canOpen?(' onclick="openDay('+info.d+')" title="기록 보기"'):'')+'>'+wx+(hasPh?'<span class="cam">📷</span>':'')+'<span>'+cur.getDate()+'</span><span class="dots">'+dots+'</span></div>';
+      cells+='<div class="mcell'+(inR?' inrange':'')+(isT?' today':'')+(hasPh?' hasph':'')+'"'+(canOpen?(' onclick="openDay('+info.d+')" title="기록 보기"'):'')+'><span class="mtop">'+wx+(hasPh?'<span class="cam">📷</span>':'')+'</span><span class="mnum">'+cur.getDate()+'</span><span class="dots">'+dots+'</span></div>';
       cur.setDate(cur.getDate()+1);
     }
     calInner='<div class="mcal-title">'+title+'</div>'+head+'<div class="mcal">'+cells+'</div>';
