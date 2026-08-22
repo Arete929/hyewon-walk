@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.41.0 · 2026-08-13
+<!-- ▣ index.html · 학생 앱 · v2.42.0 · 2026-08-13
      수정요약: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
 <head>
@@ -387,6 +387,10 @@ function paintMyPhoto(r, day){
 
 
 /* DAY-DETAIL v1 — 달력 날짜별 상세(아침·점심 기록 + 사진) */
+/* LUNCH-DEVICE v1 — 점심 사용 기기 표기 */
+function devIcon(d){ return d==='웨어러블' ? '⌚' : (d==='디벗' ? '📱' : '👟'); }
+function devLabel(d){ d=d||'만보기'; return devIcon(d)+' '+d; }
+
 function dayInfoOf(dayNum){
   var arr = (ST.summary && ST.summary.days) || [];
   for (var i=0;i<arr.length;i++) if (Number(arr[i].day) === Number(dayNum)) return arr[i];
@@ -411,8 +415,9 @@ function openDay(dayNum){
     ? '<div class="drow"><span class="ic">🌅</span><span class="lb">아침 운동</span><span class="vl">'+mk+' km</span></div>'
     : '<div class="drow off"><span class="ic">🌅</span><span class="lb">아침 운동</span><span class="vl">기록 없음</span></div>';
   var lVal = ls>0 ? (ls.toLocaleString()+'보'+(lk>0?(' · '+lk+' km'):'')) : (lk>0 ? (lk+' km') : '');
+  var lDev = ((ST.summary && ST.summary.lunchDevices) || {})[dayNum];
   var lRow = lVal
-    ? '<div class="drow"><span class="ic">🍚</span><span class="lb">점심 걷기</span><span class="vl">'+lVal+'</span></div>'
+    ? '<div class="drow"><span class="ic">🍚</span><span class="lb">점심 걷기'+(lDev?'<br><span style="font-size:11px;font-weight:700;color:var(--m2);">'+devLabel(lDev)+'</span>':'')+'</span><span class="vl">'+lVal+'</span></div>'
     : '<div class="drow off"><span class="ic">🍚</span><span class="lb">점심 걷기</span><span class="vl">기록 없음</span></div>';
 
   var o = document.createElement('div');
@@ -460,7 +465,7 @@ function renderHome(d){
     ? '<div class="center muted" style="font-size:13px;margin-top:12px;">오늘의 러닝 인증 완료! 🎉'+(d.morning.km?' · '+d.morning.km+'km':'')+'</div>'+'<div class="myphoto"><div class="ph-h"><span>📷 내가 올린 사진</span><span style="font-weight:600;color:var(--m2);">눌러서 크게 보기</span></div><div class="ph-b" id="hm-photo-b"></div></div>'
     : '<button class="btn btn-cta" style="margin-top:14px;" onclick="go(\'nrc\')"><img class="btn-ic" src="https://arete929.github.io/hyewon-walk/icons/photo.png">러닝 사진 제출</button>';
   var steps=(d.lunch&&d.lunch.steps)||0, goal=10000, pct=Math.min(100,Math.round(steps/goal*100));
-  var lunchInfo=steps?('<div class="t2">'+steps.toLocaleString()+'보 / '+((d.lunch.km!=null)?d.lunch.km:Math.round(steps*0.7)/1000)+'km</div>'):'<div class="t2">아직 기록 없음</div>';
+  var lunchInfo=steps?('<div class="t2">'+steps.toLocaleString()+'보 / '+((d.lunch.km!=null)?d.lunch.km:Math.round(steps*0.7)/1000)+'km<br><span style="font-size:11.5px;color:var(--m2);font-weight:700;">'+devLabel(d.lunch.device)+' 사용</span></div>'):'<div class="t2">아직 기록 없음</div>';
   $('hm-body').innerHTML=
     '<div class="label">오늘의 미션</div>'+
     '<div class="card"><div class="mcard"><div class="tile run ico"><img src="https://arete929.github.io/hyewon-walk/icons/run.png"></div><div class="mid"><div class="t1">아침 러닝</div><div class="t2">운동앱 기록 인증 (NRC·삼성헬스 등)</div></div>'+runBadge+'</div>'+runCta+'</div>'+

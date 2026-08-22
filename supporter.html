@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ supporter.html · 서포터즈 앱 · v2.24.0 · 2026-08-13
-     수정요약: 홈 화면 바로가기(설치) 버튼 + 전용 매니페스트 추가 -->
+<!-- ▣ supporter.html · 서포터즈 앱 · v2.42.0 · 2026-08-13
+     수정요약: 점심 사용 기기(만보기·디벗·웨어러블) 선택·표시 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -102,7 +102,13 @@
   /* 점심 카드(항상 펼침) */
   .lcard{background:#fff;border-radius:20px;box-shadow:0 5px 14px rgba(232,96,47,.07);padding:14px 15px;margin-bottom:9px;}
   .lcard-h{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
-  .l-in{display:flex;gap:6px;}
+  
+  /* LUNCH-DEVICE v1 — 기기 선택 팔레트 */
+  .dvp{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap;}
+  .dvp button{flex:1;min-width:74px;border:1.5px solid #F0E0D5;background:#fff;color:#9A8378;border-radius:11px;padding:7px 6px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;line-height:1.25;}
+  .dvp button.on{background:linear-gradient(135deg,#FF8A5B,#FF6A6A);color:#fff;border-color:transparent;}
+  .dvp button small{display:block;font-size:9.5px;font-weight:700;opacity:.8;}
+.l-in{display:flex;gap:6px;}
   .l-in .input{padding:11px 12px;font-size:13px;}
   .in-steps{flex:1.3;color:var(--coral);} .in-p{flex:.8;} .in-note{flex:1;font-weight:500;}
 
@@ -342,19 +348,39 @@ function saveRun(no,ev){ if(ev)ev.stopPropagation();
   }).withFailureHandler(function(){btn.disabled=false;btn.textContent='러닝 저장';toast('저장 오류');}).submitMorningRun(no,km,dur,{studentNo:S.sup.studentNo,name:S.sup.name});
 }
 
+
+/* LUNCH-DEVICE v1 — 기기 선택 (만보기·디벗·웨어러블) */
+var DEVICES = [['만보기',''],['디벗','태블릿'],['웨어러블','워치·밴드']];
+function devPalette(cur){
+  cur = cur || '만보기';
+  return '<div class="dvp">' + DEVICES.map(function(d){
+    return '<button type="button" class="'+(cur===d[0]?'on':'')+'" data-dv="'+d[0]+'" onclick="pickDevice(this)">'
+      + d[0] + (d[1] ? '<small>'+d[1]+'</small>' : '') + '</button>';
+  }).join('') + '</div>';
+}
+function pickDevice(btn){
+  var wrap = btn.parentNode;
+  wrap.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+}
+function deviceOf(card){
+  var on = card.querySelector('.dvp button.on');
+  return on ? on.getAttribute('data-dv') : '만보기';
+}
+
 /* 점심 카드 */
 function lunchCard(s){
   var has=s.lunchSteps?true:false;
   return '<div class="lcard" data-no="'+esc(s.studentNo)+'"><div class="lcard-h"><span class="stu-no">'+esc(s.studentNo)+'</span><span class="stu-nm" style="font-size:14px;">'+esc(s.name)+'</span>'+
     '<span class="stu-r">'+(has?'<span class="pill pill-ok">입력됨 ✓</span>':'<span class="pill pill-no">미입력</span>')+'</span></div>'+
-    '<div class="l-in"><input class="input in-steps" type="number" inputmode="numeric" placeholder="걸음수" value="'+(s.lunchSteps||'')+'"><input class="input in-p" type="text" placeholder="P-" value="'+esc(s.pedometerId||'')+'"><input class="input in-note" type="text" placeholder="비고" value="'+esc(s.note||'')+'"></div></div>';
+    devPalette(s.lunchDevice)+'<div class="l-in"><input class="input in-steps" type="number" inputmode="numeric" placeholder="걸음수" value="'+(s.lunchSteps||'')+'"><input class="input in-p" type="text" placeholder="P-" value="'+esc(s.pedometerId||'')+'"><input class="input in-note" type="text" placeholder="비고" value="'+esc(s.note||'')+'"></div></div>';
 }
 function submitLunch(){
   if(!S.day){toast('챌린지 기간이 아닙니다.');return;}
   var entries=[];
   document.querySelectorAll('#main-body .lcard').forEach(function(c){
     var st=c.querySelector('.in-steps').value.trim(); if(st==='')return;
-    entries.push({studentNo:c.getAttribute('data-no'),steps:st,pedometerId:c.querySelector('.in-p').value.trim(),note:c.querySelector('.in-note').value.trim()});
+    entries.push({studentNo:c.getAttribute('data-no'),steps:st,device:deviceOf(c),pedometerId:c.querySelector('.in-p').value.trim(),note:c.querySelector('.in-note').value.trim()});
   });
   if(!entries.length){toast('입력된 걸음수가 없습니다.');return;}
   google.script.run.withSuccessHandler(function(r){
