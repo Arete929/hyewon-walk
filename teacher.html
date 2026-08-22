@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ teacher.html · 교사 앱 · v2.47.1 · 2026-08-22
+<!-- ▣ teacher.html · 교사 앱 · v2.48.0 · 2026-08-22
      수정요약: 교사도 아침·점심 모두 사진 인증 -->
 <html lang="ko">
 <head>
@@ -127,6 +127,57 @@
   .spin-wrap{display:flex;justify-content:center;padding:40px;} .spin{width:40px;height:40px;border-radius:50%;border:4px solid #F2E2D6;border-top-color:var(--primary);animation:sp .8s linear infinite;} @keyframes sp{to{transform:rotate(360deg);}}
   .err-msg{background:var(--err-bg);color:var(--err);border-radius:10px;padding:11px 14px;font-size:14px;margin:10px 20px;display:none;} .err-msg.show{display:block;}
   .muted{color:var(--m);} .center{text-align:center;} .dev-foot{text-align:center;color:#B7A99F;font-size:11px;padding:10px 0 24px;}
+
+/* ── 문의하기 [v2.48] ── */
+#s-inq{background:#FFF9F5;}
+.iq-nav{display:flex;align-items:center;gap:8px;padding:14px 16px 8px;}
+.iq-nav h3{margin:0;font-size:17px;font-weight:800;color:#2B211C;}
+.iq-back{border:none;background:none;font-size:22px;line-height:1;color:#2B211C;cursor:pointer;padding:0 4px;}
+.iq-seg{display:flex;gap:6px;padding:0 16px 10px;}
+.iq-seg button{flex:1;border:1.5px solid #F0E5DC;background:#fff;color:#9A8378;font-size:13.5px;font-weight:800;padding:9px 0;border-radius:10px;cursor:pointer;position:relative;}
+.iq-seg button.on{background:#FF6A4A;border-color:#FF6A4A;color:#fff;}
+.iq-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#E5484D;margin-left:5px;vertical-align:2px;}
+.iq-wrap{padding:0 16px 90px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.iq-card{background:#fff;border:1px solid #F0E5DC;border-radius:14px;padding:13px 14px;margin-bottom:10px;}
+.iq-lb{font-size:12.5px;font-weight:800;color:#2B211C;margin-bottom:8px;}
+.iq-opt{font-weight:600;color:#B7A196;font-size:11.5px;}
+.iq-pal{display:flex;flex-wrap:wrap;gap:6px;}
+.iq-pal button{border:1.5px solid #F0E5DC;background:#fff;color:#7A655B;font-size:12.5px;font-weight:700;padding:8px 12px;border-radius:999px;cursor:pointer;}
+.iq-pal button.on{background:#FF6A4A;border-color:#FF6A4A;color:#fff;}
+.iq-in,.iq-ta{width:100%;box-sizing:border-box;border:1.5px solid #F0E5DC;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:#2B211C;background:#FFFDFC;}
+.iq-in:focus,.iq-ta:focus{outline:none;border-color:#FF6A4A;}
+.iq-ta{resize:vertical;line-height:1.5;}
+.iq-btn{width:100%;border:none;border-radius:12px;padding:13px 0;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;}
+.iq-cta{background:#FF6A4A;color:#fff;box-shadow:0 6px 16px rgba(255,106,74,.28);}
+.iq-cta:disabled{opacity:.55;box-shadow:none;}
+.iq-ghost{background:#fff;border:1.5px solid #F0E5DC;color:#7A655B;}
+.iq-prev{margin-top:9px;}
+.iq-prev img{width:100%;border-radius:10px;display:block;}
+.iq-prev .rm{margin-top:6px;font-size:12px;font-weight:700;color:#E5484D;background:none;border:none;cursor:pointer;padding:0;}
+.iq-err{display:none;color:#E5484D;font-size:13px;font-weight:700;margin:2px 0 8px;text-align:center;}
+.iq-err.on{display:block;}
+.iq-saved{text-align:center;font-size:12px;font-weight:700;color:#6FA96B;margin-top:8px;min-height:16px;}
+.iq-item{background:#fff;border:1px solid #F0E5DC;border-radius:14px;padding:13px 14px;margin-bottom:10px;}
+.iq-it-h{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;}
+.iq-tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:#FFF0EB;color:#FF6A4A;}
+.iq-st{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;}
+.iq-st.s0{background:#FFF3E2;color:#B5740A;}
+.iq-st.s1{background:#E9F1FF;color:#2F6FD0;}
+.iq-st.s2{background:#E8F6E9;color:#3E8E43;}
+.iq-when{font-size:11px;color:#B7A196;font-weight:700;margin-left:auto;}
+.iq-msg{font-size:13.5px;color:#2B211C;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+.iq-ph{margin-top:8px;font-size:12px;font-weight:800;color:#FF6A4A;background:none;border:none;padding:0;cursor:pointer;}
+.iq-rep{margin-top:10px;padding:10px 12px;background:#F6FBF6;border:1px solid #DCEEDC;border-radius:10px;}
+.iq-rep .h{font-size:11.5px;font-weight:800;color:#3E8E43;margin-bottom:4px;}
+.iq-rep .b{font-size:13.5px;color:#2B211C;line-height:1.55;white-space:pre-wrap;}
+.iq-empty{text-align:center;color:#B7A196;font-size:13px;padding:40px 0;}
+.iq-fab{position:fixed;right:14px;bottom:78px;z-index:45;width:52px;height:52px;border-radius:50%;border:none;background:#FF6A4A;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 8px 20px rgba(255,106,74,.4);display:none;align-items:center;justify-content:center;}
+.iq-fab .nd{position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:#E5484D;border:2px solid #fff;display:none;}
+.iq-lbox{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:120;display:flex;align-items:center;justify-content:center;padding:18px;}
+.iq-lbox img{max-width:100%;max-height:86vh;border-radius:10px;}
+.iq-lbox .x{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.16);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:17px;cursor:pointer;}
+.iq-lbox .ld{color:#fff;font-size:14px;font-weight:700;}
+
 </style>
 </head>
 <body>
@@ -206,7 +257,7 @@
 /* [PWA] GAS API와 fetch 통신 — google.script.run 인터페이스 유지 (교사·무인증) */
 var API_BASE='https://script.google.com/macros/s/AKfycby_havXeiD6E9PkN3do6WE4wF6OhcM5XotBrPovh85GSrJxHE3jo0R1bx0LBUg1CVeZ/exec';
 function apiCall(fn,args,__apiTry){__apiTry=__apiTry||1;return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,args:args||[]})}).then(function(r){return r.text();}).then(function(txt){var res;try{res=JSON.parse(txt);}catch(e){/* 구글이 JSON 대신 HTML을 준 경우 — 잠깐 쉬고 재시도 */if(__apiTry<3){return new Promise(function(ok){setTimeout(ok,600*__apiTry);}).then(function(){return apiCall(fn,args,__apiTry+1);});}throw new Error('서버 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');}return res;});}
-function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['getTeacherList','getTeacherToday','getTeacherSummary','submitTeacherPhoto','getClassOptions','getClassMonitor','getDashboardData'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
+function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['getTeacherList','getTeacherToday','getTeacherSummary','submitTeacherPhoto','getClassOptions','getClassMonitor','getDashboardData','submitInquiry','getMyInquiries','getInquiryPhoto'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
 window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
 
 var T={ name:'', cls:null, dash:null, scope:'ind', gradeFilter:0, rankMode:'student', nrcB64:'', nrcMime:'' };
@@ -516,6 +567,251 @@ function loadCum(){
   if(isIOS) setTimeout(sync,1000);
   setInterval(sync,700);   // 로그인/로그아웃 화면 전환 추적
 })();
+</script>
+
+  <!-- 문의하기 [v2.48] -->
+  <div id="s-inq" class="screen">
+    <div class="iq-nav"><button type="button" class="iq-back" onclick="inqBack()">←</button><h3>💬 문의하기</h3></div>
+    <div class="iq-seg">
+      <button type="button" id="iq-t-new" class="on" onclick="inqTab('new')">문의 작성</button>
+      <button type="button" id="iq-t-list" onclick="inqTab('list')">내 문의함<span class="iq-dot" id="iq-dot" style="display:none;"></span></button>
+    </div>
+    <div class="iq-wrap">
+      <div id="iq-new">
+        <div class="iq-card">
+          <div class="iq-lb">어떤 문의인가요?</div>
+          <div class="iq-pal" id="iq-types"></div>
+        </div>
+        <div class="iq-card">
+          <div class="iq-lb">관련 일차 <span class="iq-opt">(선택)</span></div>
+          <input id="iq-day" class="iq-in" type="number" min="1" max="14" placeholder="예: 3  ← 3일차 기록 문제라면">
+        </div>
+        <div class="iq-card">
+          <div class="iq-lb">문의 내용</div>
+          <textarea id="iq-msg" class="iq-ta" rows="5" placeholder="어떤 점이 문제인지 적어 주세요.&#10;예) 8월 25일에 1.2km 걸었는데 기록이 0으로 나와요."></textarea>
+        </div>
+        <div class="iq-card">
+          <div class="iq-lb">사진 첨부 <span class="iq-opt">(선택 · 1장)</span></div>
+          <input type="file" id="iq-file" accept="image/*" style="display:none;" onchange="inqPickFile(this)">
+          <button type="button" class="iq-btn iq-ghost" onclick="document.getElementById('iq-file').click()">📷 사진 고르기</button>
+          <div class="iq-prev" id="iq-prev"></div>
+        </div>
+        <div class="iq-err" id="iq-err"></div>
+        <button type="button" class="iq-btn iq-cta" id="iq-send" onclick="inqSubmit()">문의 보내기</button>
+        <div class="iq-saved" id="iq-saved"></div>
+      </div>
+      <div id="iq-list" style="display:none;"></div>
+    </div>
+  </div>
+  <button type="button" class="iq-fab" id="iq-fab" onclick="inqOpen()" title="문의하기">💬<span class="nd" id="iq-fab-dot"></span></button>
+
+<script>
+
+/* ═══ 문의하기 (INQUIRY v1) [v2.48] ═══ */
+var INQ = { role: '교사', type: '기록이 안 맞아요', b64: '', mime: '', list: null, tab: 'new', loaded: false };
+var INQ_TYPES = ['기록이 안 맞아요', '사진 인식이 실패해요', '앱이 안 돼요', '기타'];
+
+function inqWho(){ try { return { no: '', name: T.name }; } catch(e){ return { no:'', name:'' }; } }
+function inqReady(){ var w = inqWho(); return !!(w.no || w.name); }
+
+function inqFab(){
+  var f = document.getElementById('iq-fab'); if (!f) return;
+  var login = document.getElementById('s-login');
+  var inq = document.getElementById('s-inq');
+  var hide = (login && login.classList.contains('active')) || (inq && inq.classList.contains('active')) || !inqReady();
+  f.style.display = hide ? 'none' : 'flex';
+  if (!hide && !INQ.loaded) inqLoad(true);
+}
+
+function inqBack(){ go('home'); setTimeout(inqFab, 0); }
+
+function inqOpen(){
+  if (!inqReady()) { alert('먼저 로그인해 주세요.'); return; }
+  // 분석 결과 화면에서 눌렀다면 '기록이 안 맞아요' 로 미리 골라 준다
+  var rs = document.getElementById('s-result');
+  if (rs && rs.classList.contains('active')) INQ.type = '기록이 안 맞아요';
+  go('inq');
+  inqRenderTypes();
+  inqTab('new');
+  inqLoad();
+  setTimeout(inqFab, 0);
+}
+
+function inqTab(t){
+  INQ.tab = t;
+  document.getElementById('iq-t-new').classList.toggle('on', t === 'new');
+  document.getElementById('iq-t-list').classList.toggle('on', t === 'list');
+  document.getElementById('iq-new').style.display = (t === 'new') ? '' : 'none';
+  document.getElementById('iq-list').style.display = (t === 'list') ? '' : 'none';
+  if (t === 'list') inqRenderList();
+}
+
+function inqRenderTypes(){
+  var el = document.getElementById('iq-types'); if (!el) return;
+  el.innerHTML = INQ_TYPES.map(function(t){
+    return '<button type="button" class="' + (INQ.type === t ? 'on' : '') + '" onclick="inqPickType(\'' + t + '\')">' + t + '</button>';
+  }).join('');
+}
+function inqPickType(t){ INQ.type = t; inqRenderTypes(); }
+
+function inqShrink(file, cb){
+  try {
+    var rd = new FileReader();
+    rd.onload = function(ev){
+      var img = new Image();
+      img.onload = function(){
+        try {
+          var MAX = 1400, w = img.width, h = img.height;
+          var s = Math.min(1, MAX / Math.max(w, h));
+          if (s >= 1 && file.size <= 900 * 1024) { cb(ev.target.result.split(',')[1], file.type, ev.target.result); return; }
+          var cw = Math.round(w * s), ch = Math.round(h * s);
+          var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+          var cx = cv.getContext('2d');
+          cx.fillStyle = '#fff'; cx.fillRect(0, 0, cw, ch);
+          cx.drawImage(img, 0, 0, cw, ch);
+          var du = cv.toDataURL('image/jpeg', 0.82);
+          cb(du.split(',')[1], 'image/jpeg', du);
+        } catch(e){ cb(ev.target.result.split(',')[1], file.type, ev.target.result); }
+      };
+      img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type, ev.target.result); };
+      img.src = ev.target.result;
+    };
+    rd.readAsDataURL(file);
+  } catch(e){ cb('', '', ''); }
+}
+
+function inqPickFile(inp){
+  var f = inp.files && inp.files[0]; if (!f) return;
+  var pv = document.getElementById('iq-prev');
+  pv.innerHTML = '<div class="iq-opt">사진 준비 중…</div>';
+  inqShrink(f, function(b64, mime, dataUrl){
+    INQ.b64 = b64 || ''; INQ.mime = mime || 'image/jpeg';
+    pv.innerHTML = dataUrl
+      ? '<img src="' + dataUrl + '" alt="첨부 사진"><button type="button" class="rm" onclick="inqClearFile()">✕ 사진 빼기</button>'
+      : '<div class="iq-opt">사진을 읽지 못했어요.</div>';
+  });
+}
+function inqClearFile(){
+  INQ.b64 = ''; INQ.mime = '';
+  document.getElementById('iq-file').value = '';
+  document.getElementById('iq-prev').innerHTML = '';
+}
+
+function inqSubmit(){
+  var err = document.getElementById('iq-err'); err.classList.remove('on');
+  var msg = document.getElementById('iq-msg').value.trim();
+  if (!msg) { err.textContent = '문의 내용을 적어 주세요.'; err.classList.add('on'); return; }
+  var w = inqWho();
+  var b = document.getElementById('iq-send'); b.disabled = true; b.textContent = '보내는 중…';
+  google.script.run.withSuccessHandler(function(r){
+    b.disabled = false; b.textContent = '문의 보내기';
+    if (r && r.ok) {
+      document.getElementById('iq-msg').value = '';
+      document.getElementById('iq-day').value = '';
+      inqClearFile();
+      document.getElementById('iq-saved').textContent = '✅ 보냈어요 · ' + r.savedAt;
+      INQ.loaded = false;
+      inqLoad(false, function(){ inqTab('list'); });
+    } else {
+      err.textContent = (r && r.reason) || '보내지 못했어요. 잠시 후 다시 시도해 주세요.';
+      err.classList.add('on');
+    }
+  }).withFailureHandler(function(){
+    b.disabled = false; b.textContent = '문의 보내기';
+    err.textContent = '보내지 못했어요. 잠시 후 다시 시도해 주세요.';
+    err.classList.add('on');
+  }).submitInquiry({
+    role: INQ.role, no: w.no, name: w.name, type: INQ.type,
+    day: document.getElementById('iq-day').value, message: msg,
+    base64: INQ.b64, mime: INQ.mime
+  });
+}
+
+function inqLoad(quiet, done){
+  var w = inqWho(); if (!w.no && !w.name) return;
+  if (!quiet) {
+    var el = document.getElementById('iq-list');
+    if (el && INQ.tab === 'list') el.innerHTML = '<div class="iq-empty">불러오는 중…</div>';
+  }
+  google.script.run.withSuccessHandler(function(r){
+    INQ.loaded = true;
+    INQ.list = (r && r.ok) ? r.list : [];
+    inqBadge();
+    if (INQ.tab === 'list') inqRenderList();
+    if (done) done();
+  }).withFailureHandler(function(){ INQ.loaded = true; if (done) done(); }).getMyInquiries(w.no, w.name);
+}
+
+/* 답변이 달렸는데 아직 안 본 문의가 있으면 빨간 점 */
+function inqSeenKey(){ var w = inqWho(); return 'inq_seen_' + (w.no || w.name); }
+function inqBadge(){
+  var list = INQ.list || [];
+  var seen = 0; try { seen = parseInt(localStorage.getItem(inqSeenKey()) || '0', 10) || 0; } catch(e){}
+  var replied = list.filter(function(x){ return x.reply; }).length;
+  var on = replied > seen;
+  var d1 = document.getElementById('iq-dot'), d2 = document.getElementById('iq-fab-dot');
+  if (d1) d1.style.display = on ? 'inline-block' : 'none';
+  if (d2) d2.style.display = on ? 'block' : 'none';
+}
+function inqMarkSeen(){
+  var replied = (INQ.list || []).filter(function(x){ return x.reply; }).length;
+  try { localStorage.setItem(inqSeenKey(), String(replied)); } catch(e){}
+  inqBadge();
+}
+
+function inqRenderList(){
+  var el = document.getElementById('iq-list'); if (!el) return;
+  var list = INQ.list;
+  if (!list) { el.innerHTML = '<div class="iq-empty">불러오는 중…</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="iq-empty">아직 보낸 문의가 없어요.</div>'; inqMarkSeen(); return; }
+  el.innerHTML = list.map(function(x){
+    var sc = x.status === '완료' ? 's2' : (x.status === '처리중' ? 's1' : 's0');
+    return '<div class="iq-item">'
+      + '<div class="iq-it-h"><span class="iq-tag">' + inqEsc(x.type) + '</span>'
+      + (x.day ? '<span class="iq-tag">' + x.day + '일차</span>' : '')
+      + '<span class="iq-st ' + sc + '">' + inqEsc(x.status) + '</span>'
+      + '<span class="iq-when">' + inqEsc(x.at) + '</span></div>'
+      + '<div class="iq-msg">' + inqEsc(x.message) + '</div>'
+      + (x.hasPhoto ? '<button type="button" class="iq-ph" onclick="inqPhoto(' + x.row + ')">📷 첨부한 사진 보기</button>' : '')
+      + (x.reply ? '<div class="iq-rep"><div class="h">👩‍🏫 선생님 답변 · ' + inqEsc(x.repliedAt) + '</div><div class="b">' + inqEsc(x.reply) + '</div></div>' : '')
+      + '</div>';
+  }).join('');
+  inqMarkSeen();
+}
+function inqEsc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function inqPhoto(row){
+  var o = document.createElement('div');
+  o.className = 'iq-lbox';
+  o.innerHTML = '<button type="button" class="x">✕</button><div class="ld">사진 불러오는 중…</div>';
+  o.querySelector('.x').onclick = function(){ o.remove(); };
+  o.onclick = function(e){ if (e.target === o) o.remove(); };
+  document.body.appendChild(o);
+  var w = inqWho();
+  google.script.run.withSuccessHandler(function(r){
+    if (!o.isConnected) return;
+    o.innerHTML = '<button type="button" class="x">✕</button>' + ((r && r.ok)
+      ? '<img src="' + r.dataUrl + '" alt="문의 첨부 사진">'
+      : '<div class="ld">' + ((r && r.reason) || '사진을 불러오지 못했어요.') + '</div>');
+    o.querySelector('.x').onclick = function(){ o.remove(); };
+  }).withFailureHandler(function(){
+    if (!o.isConnected) return;
+    o.innerHTML = '<button type="button" class="x">✕</button><div class="ld">사진을 불러오지 못했어요.</div>';
+    o.querySelector('.x').onclick = function(){ o.remove(); };
+  }).getInquiryPhoto(w.no, row, true);
+}
+
+/* 화면 전환 때마다 문의 버튼 노출 갱신 */
+(function(){
+  ['go', 'showScreen', 'tab'].forEach(function(fn){
+    var orig = window[fn];
+    if (typeof orig !== 'function') return;
+    window[fn] = function(){ var r = orig.apply(this, arguments); try { inqFab(); } catch(e){} return r; };
+  });
+  document.addEventListener('DOMContentLoaded', function(){ inqRenderTypes(); setTimeout(inqFab, 400); });
+  setTimeout(function(){ try { inqRenderTypes(); inqFab(); } catch(e){} }, 800);
+})();
+
 </script>
 </body>
 </html>
