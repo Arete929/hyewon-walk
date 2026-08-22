@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.42.0 · 2026-08-13
+<!-- ▣ index.html · 학생 앱 · v2.44.0 · 2026-08-13
      수정요약: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
 <head>
@@ -179,6 +179,15 @@
   .dsheet .ph img{max-width:100%;max-height:230px;border-radius:13px;box-shadow:0 6px 18px -10px rgba(0,0,0,.45);cursor:pointer;}
   .dsheet .msg{font-size:12.5px;color:var(--m2);text-align:center;padding:8px 0;}
   .mcell.inrange{cursor:pointer;}
+
+  /* UPLOAD-UX v1 — 분석 진행률 */
+  .anz{margin:0 20px 12px;background:#fff;border:1px solid var(--div);border-radius:15px;padding:14px 16px;display:none;}
+  .anz.show{display:block;}
+  .anz .t{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:var(--t);margin-bottom:9px;}
+  .anz .pc{color:var(--primary);}
+  .anz .bar{height:9px;border-radius:99px;background:#F2EAE3;overflow:hidden;}
+  .anz .bar i{display:block;height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#FFB25E,#FF6A6A);transition:width .35s ease;}
+  .anz .st{font-size:11.5px;font-weight:700;color:var(--m2);margin-top:7px;}
   .btn-ic{width:20px;height:20px;object-fit:contain;vertical-align:-4px;margin-right:3px;}
   .badge-ic{width:18px;height:18px;object-fit:contain;vertical-align:-3px;margin-right:3px;}
   .medal-img{width:24px;height:24px;object-fit:contain;vertical-align:middle;}
@@ -235,6 +244,18 @@
   <div id="s-nrc" class="screen">
     <div class="nav"><button class="back" onclick="go('home')">←</button><h3>러닝 인증</h3></div>
     <p class="help">운동앱의 <b>운동 1건(걷기/러닝) 기록 화면</b>을 캡처해서 올려주세요. 거리·시간 숫자가 선명해야 분석이 정확해요.</p>
+    <div class="anz" id="anz">
+      <div class="t"><span>🤖 기록 분석 중</span><span class="pc" id="anz-pct">0%</span></div>
+      <div class="bar"><i id="anz-fill"></i></div>
+      <div class="st" id="anz-st">사진 준비 중…</div>
+    </div>
+    <div style="margin:0 20px 10px;background:#EAF4FF;border:1px solid #CFE4FB;border-radius:14px;padding:12px 14px;font-size:12.5px;line-height:1.75;color:#33567F;">
+      <div style="font-weight:800;color:#1E5FB0;margin-bottom:4px;">📅 언제까지 올릴 수 있나요?</div>
+      • <b>그 주에 한 운동은 그 주 일요일까지</b> 올리면 기록으로 들어가요.<br>
+      • 사진 속 <b>운동 날짜</b>로 자동 기록돼요 — 어제 운동을 오늘 올려도 <b>어제 날짜</b>로 들어갑니다.<br>
+      • <b>지난주 기록</b>이나 <b>미래 날짜</b>는 올릴 수 없어요.<br>
+      • 간식은 <b>그 시간에 바로</b> 서포터즈에게 확인받은 경우만 받을 수 있어요.
+    </div>
     <div style="margin:0 20px 8px;background:#FFF4EC;border:1px solid #FBDDAE;border-radius:14px;padding:12px 14px;font-size:12.5px;line-height:1.75;color:#8A6A55;">
       <div style="font-weight:800;color:#FF6A4A;margin-bottom:5px;">📸 어떤 화면을 올리나요?</div>
       • <b>삼성헬스</b>: 운동 기록 → 오늘 걷기/달리기 → <b>운동 상세</b><br>
@@ -476,20 +497,82 @@ function renderHome(d){
 }
 
 /* ── NRC 업로드 ── */
+
+/* UPLOAD-UX v1 — 업로드 전 축소 + 분석 진행률 */
+function shrinkImage(file, cb){
+  try {
+    var rd = new FileReader();
+    rd.onload = function(ev){
+      var img = new Image();
+      img.onload = function(){
+        try {
+          var MAX = 1400, w = img.width, h = img.height;
+          var scale = Math.min(1, MAX / Math.max(w, h));
+          if (scale >= 1 && file.size <= 900*1024) { cb(ev.target.result.split(',')[1], file.type); return; }
+          var cw = Math.round(w*scale), ch = Math.round(h*scale);
+          var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+          var cx = cv.getContext('2d');
+          cx.fillStyle = '#fff'; cx.fillRect(0,0,cw,ch);
+          cx.drawImage(img, 0, 0, cw, ch);
+          cb(cv.toDataURL('image/jpeg', 0.82).split(',')[1], 'image/jpeg');
+        } catch(e){ cb(ev.target.result.split(',')[1], file.type); }
+      };
+      img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type); };
+      img.src = ev.target.result;
+    };
+    rd.readAsDataURL(file);
+  } catch(e){ cb(null, null); }
+}
+
+/* 실제 진행률을 알 수 없으므로 단계별로 자연스럽게 차오르게 하고, 응답이 오면 100%로 마감 */
+var ANZ = { timer:null, pct:0 };
+function anzStages(){ return [
+  [12,'사진 준비 중…'], [30,'사진 올리는 중…'], [55,'AI가 기록을 읽는 중…'],
+  [75,'거리·날짜 확인 중…'], [92,'거의 다 됐어요…'] ]; }
+function anzStart(){
+  var box=document.getElementById('anz'); if(!box) return;
+  box.classList.add('show');
+  ANZ.pct=0; anzSet(0,'사진 준비 중…');
+  var t0=Date.now();
+  clearInterval(ANZ.timer);
+  ANZ.timer=setInterval(function(){
+    var sec=(Date.now()-t0)/1000;
+    // 12초에 걸쳐 92%까지, 그 뒤엔 아주 천천히
+    var p = sec<12 ? (sec/12)*92 : Math.min(97, 92 + (sec-12)*0.6);
+    var st='분석 중…', S=anzStages();
+    for (var i=0;i<S.length;i++) if (p>=S[i][0]-12) st=S[i][1];
+    anzSet(p, st);
+  }, 250);
+}
+function anzSet(p, st){
+  ANZ.pct=p;
+  var f=document.getElementById('anz-fill'), n=document.getElementById('anz-pct'), s=document.getElementById('anz-st');
+  if(f) f.style.width=Math.max(0,Math.min(100,p))+'%';
+  if(n) n.textContent=Math.round(Math.max(0,Math.min(100,p)))+'%';
+  if(s&&st) s.textContent=st;
+}
+function anzEnd(ok){
+  clearInterval(ANZ.timer); ANZ.timer=null;
+  anzSet(100, ok===false ? '실패' : '분석 완료!');
+  setTimeout(function(){ var b=document.getElementById('anz'); if(b) b.classList.remove('show'); }, 600);
+}
+
 function previewNrc(input){
   var f=input.files[0]; if(!f)return; var e=$('nrc-err'); e.classList.remove('show');
   if(!f.type.startsWith('image/')){showErr(e,'이미지 파일만 선택 가능합니다.');return;}
   if(f.size>10*1024*1024){showErr(e,'10MB 이하 파일만 가능합니다.');return;}
-  ST.nrcMime=f.type; var rd=new FileReader();
-  rd.onload=function(ev){ST.nrcB64=ev.target.result.split(',')[1];var p=$('nrc-prev');p.src=ev.target.result;p.style.display='block';$('drop').style.display='none';$('btn-nrc').disabled=false;};
+  ST.nrcMime=f.type;
+  shrinkImage(f,function(b64,mime){ ST.nrcB64=b64; ST.nrcMime=mime||f.type; });   // 전송용은 축소본
+  var rd=new FileReader();
+  rd.onload=function(ev){var p=$('nrc-prev');p.src=ev.target.result;p.style.display='block';$('drop').style.display='none';$('btn-nrc').disabled=false;};
   rd.readAsDataURL(f);
 }
 function submitNrc(force){
-  if(!ST.nrcB64)return; var b=$('btn-nrc'); b.disabled=true; b.textContent='분석 중… (잠시만요)';
-  google.script.run.withSuccessHandler(function(r){b.disabled=false;b.textContent='제출하기';
+  if(!ST.nrcB64)return; var b=$('btn-nrc'); b.disabled=true; b.textContent='분석 중…'; anzStart();
+  google.script.run.withSuccessHandler(function(r){b.disabled=false;b.textContent='제출하기';anzEnd(!!(r&&r.ok));
     if(r&&r.needConfirm){ if(confirm(r.reason+'\n\n다시 제출할까요?')){submitNrc(true);} return; }
     renderResult(r);go('result');})
-    .withFailureHandler(function(){b.disabled=false;b.textContent='제출하기';showErr($('nrc-err'),'제출 중 오류가 발생했습니다.');}).submitNrcPhoto(ST.no,ST.nrcB64,ST.nrcMime,'web',force===true);
+    .withFailureHandler(function(){b.disabled=false;b.textContent='제출하기';anzEnd(false);showErr($('nrc-err'),'제출 중 오류가 발생했습니다.');}).submitNrcPhoto(ST.no,ST.nrcB64,ST.nrcMime,'web',force===true);
 }
 function renderResult(r){
   var ok=r.ok&&r.finalResult;
