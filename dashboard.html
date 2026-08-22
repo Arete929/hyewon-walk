@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ dashboard.html · 순위 대시보드(PWA) · v2.48.0 · 2026-08-22
+<!-- ▣ dashboard.html · 순위 대시보드(PWA) · v2.49.0 · 2026-08-23
      수정요약: 순위 대시보드 PWA 이전(구글 배너 제거) + 전용 매니페스트 -->
 <html lang="ko">
 <head>
@@ -161,6 +161,111 @@ setInterval(load,60000);
 <script>(function(){var n=document.querySelectorAll('.deploy-stamp');for(var i=0;i<n.length;i++){if(n[i].textContent.indexOf('\x3c?')>=0)n[i].textContent='미리보기';}})();</script>
 <script>
 (function(){ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');var rf=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(rf)return;rf=true;location.reload();});} })();
+</script>
+<script>
+/* ═══ UI-DIALOG v1 [v2.49] — 브라우저 기본 대화상자 대체 ═══
+   GAS/PWA 어디서든 «...googleusercontent.com에 삽입된 페이지 내용:» 제목 없이
+   앱 디자인 그대로 알림·확인·입력을 띄운다. */
+(function(){
+  if (window.uiAlert) return;
+
+  var css = ''
+    + '.ud-ov{position:fixed;inset:0;background:rgba(24,18,15,.52);z-index:100000;display:flex;align-items:center;justify-content:center;padding:22px;'
+    +   '-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:udFade .13s ease-out;}'
+    + '@keyframes udFade{from{opacity:0}to{opacity:1}}'
+    + '@keyframes udPop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}'
+    + '.ud-bx{width:100%;max-width:330px;background:#fff;border-radius:16px;padding:22px 20px 16px;'
+    +   'box-shadow:0 18px 48px rgba(0,0,0,.28);animation:udPop .16s ease-out;'
+    +   'font-family:inherit;text-align:center;}'
+    + '.ud-ic{font-size:30px;line-height:1;margin-bottom:10px;}'
+    + '.ud-ti{font-size:16px;font-weight:800;color:#241C18;margin-bottom:7px;}'
+    + '.ud-ms{font-size:14px;line-height:1.6;color:#4A3B34;white-space:pre-line;word-break:break-word;max-height:46vh;overflow-y:auto;text-align:left;}'
+    + '.ud-bx.c .ud-ms{text-align:center;}'
+    + '.ud-in{width:100%;box-sizing:border-box;margin-top:13px;border:1.5px solid #E3D8D0;border-radius:10px;'
+    +   'padding:11px 13px;font-size:14.5px;font-family:inherit;color:#241C18;background:#FFFDFC;}'
+    + '.ud-in:focus{outline:none;border-color:var(--ud-c);}'
+    + '.ud-bt{display:flex;gap:8px;margin-top:17px;}'
+    + '.ud-bt button{flex:1;border:none;border-radius:11px;padding:12px 0;font-size:14.5px;font-weight:800;'
+    +   'font-family:inherit;cursor:pointer;}'
+    + '.ud-ok{background:var(--ud-c);color:#fff;}'
+    + '.ud-no{background:#F2ECE8;color:#6B5A52;}'
+    + '.ud-dg{background:#D93025;color:#fff;}';
+  var st = document.createElement('style');
+  st.textContent = css;
+  (document.head || document.documentElement).appendChild(st);
+
+  /* 앱 대표색을 그대로 쓴다(관리자=파랑, 챌린저=코랄 …) */
+  function accent(){
+    try {
+      var s = getComputedStyle(document.documentElement);
+      var v = (s.getPropertyValue('--primary') || s.getPropertyValue('--coral') || '').trim();
+      if (v) return v;
+    } catch(e){}
+    return '#FF6A4A';
+  }
+
+  function open(o){
+    var ov = document.createElement('div');
+    ov.className = 'ud-ov';
+    ov.style.setProperty('--ud-c', accent());
+    var wantInput = (o.mode === 'prompt');
+    ov.innerHTML = '<div class="ud-bx' + (o.center === false ? '' : ' c') + '">'
+      + (o.icon ? '<div class="ud-ic">' + o.icon + '</div>' : '')
+      + (o.title ? '<div class="ud-ti">' + esc(o.title) + '</div>' : '')
+      + '<div class="ud-ms">' + esc(o.message) + '</div>'
+      + (wantInput ? '<input class="ud-in" type="text" placeholder="' + esc(o.placeholder || '') + '" value="' + esc(o.value || '') + '">' : '')
+      + '<div class="ud-bt">'
+      +   (o.mode === 'alert' ? '' : '<button type="button" class="ud-no">' + esc(o.cancelText || '취소') + '</button>')
+      +   '<button type="button" class="ud-' + (o.danger ? 'dg' : 'ok') + '">' + esc(o.okText || '확인') + '</button>'
+      + '</div></div>';
+    document.body.appendChild(ov);
+
+    var input = ov.querySelector('.ud-in');
+    var done = false;
+    function close(){ if (done) return; done = true; document.removeEventListener('keydown', key, true); ov.remove(); }
+    function ok(){ var v = input ? input.value : true; close(); if (o.onOk) o.onOk(v); }
+    function no(){ close(); if (o.onCancel) o.onCancel(); }
+    function key(e){
+      if (e.key === 'Escape') { e.preventDefault(); if (o.mode === 'alert') ok(); else no(); }
+      else if (e.key === 'Enter' && (!input || document.activeElement === input)) { e.preventDefault(); ok(); }
+    }
+    ov.querySelector('.ud-ok, .ud-dg').onclick = ok;
+    var nb = ov.querySelector('.ud-no'); if (nb) nb.onclick = no;
+    ov.onclick = function(e){ if (e.target === ov && o.mode !== 'prompt') { if (o.mode === 'alert') ok(); else no(); } };
+    document.addEventListener('keydown', key, true);
+    setTimeout(function(){ (input || ov.querySelector('.ud-ok, .ud-dg')).focus(); }, 30);
+    return ov;
+  }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  /* 메시지 앞머리 이모지를 아이콘으로 끌어올린다 (✅ 저장됐어요 → 아이콘 ✅) */
+  function split(msg){
+    var m = String(msg == null ? '' : msg);
+    var f = m.match(/^\s*([\u2190-\u2BFF\u{1F300}-\u{1FAFF}\u2705\u26A0\uFE0F]+)\s+/u);
+    if (f) return { icon: f[1], message: m.slice(f[0].length) };
+    return { icon: '', message: m };
+  }
+
+  window.uiAlert = function(msg, onOk){
+    var s = split(msg);
+    return open({ mode:'alert', icon: s.icon || 'ℹ️', message: s.message, onOk: onOk });
+  };
+  window.uiConfirm = function(msg, onOk, opt){
+    opt = opt || {};
+    var s = split(msg);
+    return open({ mode:'confirm', icon: s.icon || (opt.danger ? '🗑' : '❓'), message: s.message,
+      okText: opt.okText, cancelText: opt.cancelText, danger: opt.danger, onOk: onOk, onCancel: opt.onCancel });
+  };
+  window.uiPrompt = function(msg, onOk, opt){
+    opt = opt || {};
+    var s = split(msg);
+    return open({ mode:'prompt', icon: s.icon || '✏️', message: s.message, center:false,
+      placeholder: opt.placeholder, value: opt.value, okText: opt.okText, onOk: onOk, onCancel: opt.onCancel });
+  };
+
+  /* 기본 alert 는 그대로 바꿔치기 (반환값을 안 쓰므로 안전) */
+  window.alert = function(m){ window.uiAlert(m); };
+})();
 </script>
 </body>
 </html>
