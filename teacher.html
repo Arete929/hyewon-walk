@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ teacher.html · 교사 앱 · v2.58.0 · 2026-08-24
+<!-- ▣ teacher.html · 교사 앱 · v2.59.0 · 2026-08-24
      수정요약: 교사도 아침·점심 모두 사진 인증 -->
 <html lang="ko">
 <head>
@@ -344,15 +344,15 @@ function shrinkImage(file, cb){
       var img = new Image();
       img.onload = function(){
         try {
-          var MAX = 1400, w = img.width, h = img.height;
+          var MAX = 1100, w = img.width, h = img.height;   // [v2.59] 전송량 절반으로
           var scale = Math.min(1, MAX / Math.max(w, h));
-          if (scale >= 1 && file.size <= 900*1024) { cb(ev.target.result.split(',')[1], file.type); return; }
+          if (scale >= 1 && file.size <= 400*1024) { cb(ev.target.result.split(',')[1], file.type); return; }
           var cw = Math.round(w*scale), ch = Math.round(h*scale);
           var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
           var cx = cv.getContext('2d');
           cx.fillStyle = '#fff'; cx.fillRect(0,0,cw,ch);
           cx.drawImage(img, 0, 0, cw, ch);
-          cb(cv.toDataURL('image/jpeg', 0.82).split(',')[1], 'image/jpeg');
+          cb(cv.toDataURL('image/jpeg', 0.75).split(',')[1], 'image/jpeg');
         } catch(e){ cb(ev.target.result.split(',')[1], file.type); }
       };
       img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type); };

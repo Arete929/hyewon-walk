@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.58.0 · 2026-08-24
+<!-- ▣ index.html · 학생 앱 · v2.59.0 · 2026-08-24
      수정요약: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
 <head>
@@ -561,15 +561,15 @@ function shrinkImage(file, cb){
       var img = new Image();
       img.onload = function(){
         try {
-          var MAX = 1400, w = img.width, h = img.height;
+          var MAX = 1100, w = img.width, h = img.height;   // [v2.59] 전송량 절반으로
           var scale = Math.min(1, MAX / Math.max(w, h));
-          if (scale >= 1 && file.size <= 900*1024) { cb(ev.target.result.split(',')[1], file.type); return; }
+          if (scale >= 1 && file.size <= 400*1024) { cb(ev.target.result.split(',')[1], file.type); return; }
           var cw = Math.round(w*scale), ch = Math.round(h*scale);
           var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
           var cx = cv.getContext('2d');
           cx.fillStyle = '#fff'; cx.fillRect(0,0,cw,ch);
           cx.drawImage(img, 0, 0, cw, ch);
-          cb(cv.toDataURL('image/jpeg', 0.82).split(',')[1], 'image/jpeg');
+          cb(cv.toDataURL('image/jpeg', 0.75).split(',')[1], 'image/jpeg');
         } catch(e){ cb(ev.target.result.split(',')[1], file.type); }
       };
       img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type); };
@@ -741,12 +741,27 @@ function renderCum(d){
 function startQr(){
   var box=$('qr-box');
   $('qr-title').textContent=ST.qr==='rain'?'🌧️ 우천 대체 체크인':'📍 아침 체크인';
-  if(!navigator.geolocation){box.innerHTML=qrResult(false,'GPS를 지원하지 않는 기기입니다.');return;}
+  // [v2.59] 위치 미지원 기기도 막지 않는다 — 서버가 좌표 없이 처리
+  // [v2.59] 위치를 못 잡아도 체크인은 시도한다.
+  //  · 예전엔 GPS 실패 = 서버 요청조차 안 감 → «체크인 실패» 로 끝났다 (2026-08-24 4명 발생)
+  //  · 서버가 GPS_모드 «기록만» 이면 좌표 없이도 통과시킨다
+  var sent = false;
+  function doCheckIn(lat, lng){
+    if (sent) return; sent = true;
+    google.script.run.withSuccessHandler(function(r){
+      box.innerHTML = r.ok
+        ? qrResult(true, r.day + '일차 체크인 완료!' + (r.distance != null ? '\n학교까지 ' + r.distance + 'm' : ''))
+        : qrResult(false, r.reason || '체크인 실패');
+    }).withFailureHandler(function(){ box.innerHTML = qrResult(false, '처리 중 오류가 발생했습니다.'); })
+      .checkInMorning(ST.no, lat, lng, 'web', ST.qr, ST.qrToken);
+  }
+  if (!navigator.geolocation) { doCheckIn(null, null); return; }
+  var gtimer = setTimeout(function(){ doCheckIn(null, null); }, 4500);   // 4.5초 넘으면 위치 없이 진행
   navigator.geolocation.getCurrentPosition(function(pos){
-    google.script.run.withSuccessHandler(function(r){box.innerHTML=r.ok?qrResult(true,r.day+'일차 체크인 완료!\n학교까지 '+r.distance+'m'):qrResult(false,r.reason||'체크인 실패');})
-      .withFailureHandler(function(){box.innerHTML=qrResult(false,'처리 중 오류가 발생했습니다.');})
-      .checkInMorning(ST.no,pos.coords.latitude,pos.coords.longitude,'web',ST.qr,ST.qrToken);
-  },function(){box.innerHTML=qrResult(false,'GPS 권한/신호를 확인해 주세요.');},{enableHighAccuracy:true,timeout:10000});
+    clearTimeout(gtimer); doCheckIn(pos.coords.latitude, pos.coords.longitude);
+  }, function(){
+    clearTimeout(gtimer); doCheckIn(null, null);
+  }, { enableHighAccuracy: true, timeout: 4000, maximumAge: 30000 });
 }
 function qrResult(ok,msg){
   return '<div style="font-size:64px;">'+(ok?'<img src="https://arete929.github.io/hyewon-walk/icons/check.png" style="width:64px;height:64px;">':'❌')+'</div><div style="font-size:22px;font-weight:800;margin:8px 0;color:'+(ok?'var(--suc-t)':'var(--err)')+';">'+(ok?'체크인 성공!':'체크인 실패')+'</div><div class="muted" style="white-space:pre-line;font-size:14px;">'+esc(msg)+'</div>'+
