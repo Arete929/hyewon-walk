@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.60.3 · 2026-08-24
+<!-- ▣ index.html · 학생 앱 · v2.61.0 · 2026-08-25
      수정요약: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
 <head>
@@ -259,8 +259,22 @@
 .iq-rep .h{font-size:11.5px;font-weight:800;color:#3E8E43;margin-bottom:4px;}
 .iq-rep .b{font-size:13.5px;color:#2B211C;line-height:1.55;white-space:pre-wrap;}
 .iq-empty{text-align:center;color:#B7A196;font-size:13px;padding:40px 0;}
-.iq-fab{position:fixed;right:14px;bottom:78px;z-index:45;width:52px;height:52px;border-radius:50%;border:none;background:#FF6A4A;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 8px 20px rgba(255,106,74,.4);display:none;align-items:center;justify-content:center;}
-.iq-fab .nd{position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:#E5484D;border:2px solid #fff;display:none;}
+.iq-fab{position:fixed;right:12px;bottom:78px;z-index:45;border:none;border-radius:999px;padding:11px 16px 11px 13px;
+  background:#FF6A4A;color:#fff;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;
+  box-shadow:0 8px 20px rgba(255,106,74,.4);display:none;align-items:center;gap:6px;white-space:nowrap;}
+.iq-fab .ic{font-size:17px;line-height:1;}
+.iq-fab .nd{position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#E5484D;border:2px solid #fff;display:none;}
+.iq-note{background:#EAF4FF;border:1px solid #CFE4FB;border-radius:12px;padding:12px 14px;margin-bottom:10px;
+  font-size:12.5px;line-height:1.75;color:#33567F;}
+.iq-note b{display:block;color:#1E5FB0;font-size:13px;margin-bottom:5px;}
+.iq-note .step{display:block;}
+.iq-shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:10px;}
+.iq-shot{position:relative;border-radius:10px;overflow:hidden;background:#F3EDE9;aspect-ratio:1;}
+.iq-shot img{width:100%;height:100%;object-fit:cover;display:block;}
+.iq-shot .rm{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.55);color:#fff;font-size:12px;line-height:1;cursor:pointer;padding:0;}
+.iq-shot .nn{position:absolute;left:4px;bottom:3px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;
+  font-weight:800;border-radius:5px;padding:1px 5px;}
 .iq-lbox{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:120;display:flex;align-items:center;justify-content:center;padding:18px;}
 .iq-lbox img{max-width:100%;max-height:86vh;border-radius:10px;}
 .iq-lbox .x{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.16);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:17px;cursor:pointer;}
@@ -889,7 +903,7 @@ $('inp-student-no').addEventListener('keydown',function(e){if(e.key==='Enter')$(
 
   <!-- 문의하기 [v2.48] -->
   <div id="s-inq" class="screen">
-    <div class="iq-nav"><button type="button" class="iq-back" onclick="inqBack()">←</button><h3>💬 문의하기</h3></div>
+    <div class="iq-nav"><button type="button" class="iq-back" onclick="inqBack()">←</button><h3>💬 체육쌤께 문의하기</h3></div>
     <div class="iq-seg">
       <button type="button" id="iq-t-new" class="on" onclick="inqTab('new')">문의 작성</button>
       <button type="button" id="iq-t-list" onclick="inqTab('list')">내 문의함<span class="iq-dot" id="iq-dot" style="display:none;"></span></button>
@@ -908,10 +922,17 @@ $('inp-student-no').addEventListener('keydown',function(e){if(e.key==='Enter')$(
           <div class="iq-lb">문의 내용</div>
           <textarea id="iq-msg" class="iq-ta" rows="5" placeholder="어떤 점이 문제인지 적어 주세요.&#10;예) 8월 25일에 1.2km 걸었는데 기록이 0으로 나와요."></textarea>
         </div>
+        <div class="iq-note">
+          <b>📸 사진은 이렇게 올려 주세요</b>
+          <span class="step">① <b style="display:inline;">안 되는 화면</b>을 그대로 캡처해 주세요 (빨간 실패 메시지가 보이게)</span>
+          <span class="step">② <b style="display:inline;">운동 앱 기록 화면</b>도 같이 올려 주세요 (거리·시간이 보이는 화면)</span>
+          두 장을 함께 보내주면 선생님이 <b style="display:inline;">기록을 바로 넣어줄 수 있어요.</b>
+        </div>
         <div class="iq-card">
-          <div class="iq-lb">사진 첨부 <span class="iq-opt">(선택 · 1장)</span></div>
-          <input type="file" id="iq-file" accept="image/*" style="display:none;" onchange="inqPickFile(this)">
-          <button type="button" class="iq-btn iq-ghost" onclick="document.getElementById('iq-file').click()">📷 사진 고르기</button>
+          <div class="iq-lb">사진 첨부 <span class="iq-opt">(최대 5장)</span></div>
+          <input type="file" id="iq-file" accept="image/*" multiple style="display:none;" onchange="inqPickFile(this)">
+          <button type="button" class="iq-btn iq-ghost" onclick="document.getElementById('iq-file').click()">📷 사진 고르기 (여러 장 선택 가능)</button>
+          <div class="iq-shots" id="iq-shots"></div>
           <div class="iq-prev" id="iq-prev"></div>
         </div>
         <div class="iq-err" id="iq-err"></div>
@@ -921,12 +942,12 @@ $('inp-student-no').addEventListener('keydown',function(e){if(e.key==='Enter')$(
       <div id="iq-list" style="display:none;"></div>
     </div>
   </div>
-  <button type="button" class="iq-fab" id="iq-fab" onclick="inqOpen()" title="문의하기">💬<span class="nd" id="iq-fab-dot"></span></button>
+  <button type="button" class="iq-fab" id="iq-fab" onclick="inqOpen()" title="체육쌤께 문의하기"><span class="ic">💬</span>체육쌤께 문의하기<span class="nd" id="iq-fab-dot"></span></button>
 
 <script>
 
 /* ═══ 문의하기 (INQUIRY v1) [v2.48] ═══ */
-var INQ = { role: '챌린저', type: '기록이 안 맞아요', b64: '', mime: '', list: null, tab: 'new', loaded: false };
+var INQ = { role: '챌린저', type: '기록이 안 맞아요', shots: [], list: null, tab: 'new', loaded: false };
 var INQ_TYPES = ['기록이 안 맞아요', '사진 인식이 실패해요', '앱이 안 돼요', '기타'];
 
 function inqWho(){ try { return { no: ST.no, name: ST.name }; } catch(e){ return { no:'', name:'' }; } }
@@ -950,6 +971,7 @@ function inqOpen(){
   if (rs && rs.classList.contains('active')) INQ.type = '기록이 안 맞아요';
   go('inq');
   inqRenderTypes();
+  inqRenderShots();
   inqTab('new');
   inqLoad();
   setTimeout(inqFab, 0);
@@ -998,21 +1020,37 @@ function inqShrink(file, cb){
   } catch(e){ cb('', '', ''); }
 }
 
+/* [v2.61] 사진 여러 장 */
 function inqPickFile(inp){
-  var f = inp.files && inp.files[0]; if (!f) return;
+  var fl = inp.files; if (!fl || !fl.length) return;
+  var room = 5 - INQ.shots.length;
+  if (room <= 0) { document.getElementById('iq-prev').innerHTML = '<div class="iq-opt">사진은 5장까지예요.</div>'; inp.value = ''; return; }
+  var list = [].slice.call(fl, 0, room);
   var pv = document.getElementById('iq-prev');
   pv.innerHTML = '<div class="iq-opt">사진 준비 중…</div>';
-  inqShrink(f, function(b64, mime, dataUrl){
-    INQ.b64 = b64 || ''; INQ.mime = mime || 'image/jpeg';
-    pv.innerHTML = dataUrl
-      ? '<img src="' + dataUrl + '" alt="첨부 사진"><button type="button" class="rm" onclick="inqClearFile()">✕ 사진 빼기</button>'
-      : '<div class="iq-opt">사진을 읽지 못했어요.</div>';
+  var left = list.length;
+  list.forEach(function(f){
+    inqShrink(f, function(b64, mime, dataUrl){
+      if (b64) INQ.shots.push({ base64: b64, mime: mime || 'image/jpeg', url: dataUrl });
+      if (--left === 0) { pv.innerHTML = ''; inqRenderShots(); }
+    });
   });
+  inp.value = '';
 }
+function inqRenderShots(){
+  var el = document.getElementById('iq-shots'); if (!el) return;
+  el.innerHTML = INQ.shots.map(function(s, i){
+    return '<div class="iq-shot"><img src="' + s.url + '" alt="첨부 ' + (i+1) + '">' +
+           '<span class="nn">' + (i+1) + '</span>' +
+           '<button type="button" class="rm" title="빼기" onclick="inqDropShot(' + i + ')">✕</button></div>';
+  }).join('');
+}
+function inqDropShot(i){ INQ.shots.splice(i, 1); inqRenderShots(); }
 function inqClearFile(){
-  INQ.b64 = ''; INQ.mime = '';
-  document.getElementById('iq-file').value = '';
-  document.getElementById('iq-prev').innerHTML = '';
+  INQ.shots = [];
+  var f = document.getElementById('iq-file'); if (f) f.value = '';
+  var pv = document.getElementById('iq-prev'); if (pv) pv.innerHTML = '';
+  inqRenderShots();
 }
 
 function inqSubmit(){
@@ -1041,7 +1079,7 @@ function inqSubmit(){
   }).submitInquiry({
     role: INQ.role, no: w.no, name: w.name, type: INQ.type,
     day: document.getElementById('iq-day').value, message: msg,
-    base64: INQ.b64, mime: INQ.mime
+    photos: INQ.shots.map(function(s){ return { base64: s.base64, mime: s.mime }; })
   });
 }
 
@@ -1090,7 +1128,7 @@ function inqRenderList(){
       + '<span class="iq-st ' + sc + '">' + inqEsc(x.status) + '</span>'
       + '<span class="iq-when">' + inqEsc(x.at) + '</span></div>'
       + '<div class="iq-msg">' + inqEsc(x.message) + '</div>'
-      + (x.hasPhoto ? '<button type="button" class="iq-ph" onclick="inqPhoto(' + x.row + ')">📷 첨부한 사진 보기</button>' : '')
+      + (x.hasPhoto ? '<button type="button" class="iq-ph" onclick="inqPhoto(' + x.row + ',0)">📷 첨부한 사진 보기' + (x.photoCount > 1 ? ' (' + x.photoCount + '장)' : '') + '</button>' : '')
       + (x.reply ? '<div class="iq-rep"><div class="h">👩‍🏫 선생님 답변 · ' + inqEsc(x.repliedAt) + '</div><div class="b">' + inqEsc(x.reply) + '</div></div>' : '')
       + '</div>';
   }).join('');
@@ -1098,7 +1136,7 @@ function inqRenderList(){
 }
 function inqEsc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-function inqPhoto(row){
+function inqPhoto(row, idx){
   var o = document.createElement('div');
   o.className = 'iq-lbox';
   o.innerHTML = '<button type="button" class="x">✕</button><div class="ld">사진 불러오는 중…</div>';
@@ -1108,15 +1146,25 @@ function inqPhoto(row){
   var w = inqWho();
   google.script.run.withSuccessHandler(function(r){
     if (!o.isConnected) return;
+    var nav = '';
+    if (r && r.ok && r.count > 1) {
+      nav = '<div style="position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#fff;font-weight:800;font-size:13px;">'
+          + '<button type="button" class="pv" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:8px;padding:7px 12px;margin:0 6px;font-weight:800;cursor:pointer;">‹ 이전</button>'
+          + (r.index + 1) + ' / ' + r.count
+          + '<button type="button" class="nx" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:8px;padding:7px 12px;margin:0 6px;font-weight:800;cursor:pointer;">다음 ›</button></div>';
+    }
     o.innerHTML = '<button type="button" class="x">✕</button>' + ((r && r.ok)
       ? '<img src="' + r.dataUrl + '" alt="문의 첨부 사진">'
-      : '<div class="ld">' + ((r && r.reason) || '사진을 불러오지 못했어요.') + '</div>');
+      : '<div class="ld">' + ((r && r.reason) || '사진을 불러오지 못했어요.') + '</div>') + nav;
     o.querySelector('.x').onclick = function(){ o.remove(); };
+    var pv = o.querySelector('.pv'), nx = o.querySelector('.nx');
+    if (pv) pv.onclick = function(){ o.remove(); inqPhoto(row, (r.index - 1 + r.count) % r.count); };
+    if (nx) nx.onclick = function(){ o.remove(); inqPhoto(row, (r.index + 1) % r.count); };
   }).withFailureHandler(function(){
     if (!o.isConnected) return;
     o.innerHTML = '<button type="button" class="x">✕</button><div class="ld">사진을 불러오지 못했어요.</div>';
     o.querySelector('.x').onclick = function(){ o.remove(); };
-  }).getInquiryPhoto(w.no, row, true);
+  }).getInquiryPhoto(w.no, row, true, idx || 0);
 }
 
 /* 화면 전환 때마다 문의 버튼 노출 갱신 */
