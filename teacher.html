@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ▣ teacher.html · 교사 앱 · v2.61.0 · 2026-08-25
+<!-- ▣ teacher.html · 교사 앱 · v2.61.1 · 2026-08-25
      수정요약: 교사도 아침·점심 모두 사진 인증 -->
 <html lang="ko">
 <head>
@@ -676,48 +676,71 @@ function inqRenderTypes(){
 }
 function inqPickType(t){ INQ.type = t; inqRenderTypes(); }
 
+/* [v2.61.1] 한 장 축소. 실패하면 더 작게 다시 시도하고, 그래도 안 되면 «포기»한다.
+   예전엔 실패 시 원본(3MB급)을 그대로 보내서 업로드가 통째로 실패했다. */
 function inqShrink(file, cb){
-  try {
-    var rd = new FileReader();
-    rd.onload = function(ev){
-      var img = new Image();
-      img.onload = function(){
+  var SIZES = [1000, 700, 500];
+  var rd;
+  try { rd = new FileReader(); } catch(e){ cb('', '', ''); return; }
+  rd.onerror = function(){ cb('', '', ''); };
+  rd.onload = function(ev){
+    var src = ev.target.result;
+    var img = new Image();
+    img.onerror = function(){ cb('', '', ''); };   // 원본 전송 금지
+    img.onload = function(){
+      for (var i = 0; i < SIZES.length; i++) {
         try {
-          var MAX = 1400, w = img.width, h = img.height;
+          var MAX = SIZES[i], w = img.width, h = img.height;
           var s = Math.min(1, MAX / Math.max(w, h));
-          if (s >= 1 && file.size <= 900 * 1024) { cb(ev.target.result.split(',')[1], file.type, ev.target.result); return; }
-          var cw = Math.round(w * s), ch = Math.round(h * s);
+          var cw = Math.max(1, Math.round(w * s)), ch = Math.max(1, Math.round(h * s));
           var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
           var cx = cv.getContext('2d');
           cx.fillStyle = '#fff'; cx.fillRect(0, 0, cw, ch);
           cx.drawImage(img, 0, 0, cw, ch);
-          var du = cv.toDataURL('image/jpeg', 0.82);
-          cb(du.split(',')[1], 'image/jpeg', du);
-        } catch(e){ cb(ev.target.result.split(',')[1], file.type, ev.target.result); }
-      };
-      img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type, ev.target.result); };
-      img.src = ev.target.result;
+          var du = cv.toDataURL('image/jpeg', 0.70);
+          cv.width = 1; cv.height = 1;   // 메모리 즉시 반납
+          if (du && du.length > 100) { cb(du.split(',')[1], 'image/jpeg', du); return; }
+        } catch(e){ /* 다음(더 작은) 크기로 재시도 */ }
+      }
+      cb('', '', '');
     };
-    rd.readAsDataURL(file);
-  } catch(e){ cb('', '', ''); }
+    img.src = src;
+  };
+  try { rd.readAsDataURL(file); } catch(e){ cb('', '', ''); }
 }
 
 /* [v2.61] 사진 여러 장 */
+var INQ_MAX_TOTAL = 4 * 1024 * 1024;   // base64 합계 상한 (약 4MB)
+
+/* [v2.61.1] 한 장씩 «순서대로» 줄인다. 동시에 여러 장을 디코딩하면 폰 메모리가 터진다. */
 function inqPickFile(inp){
   var fl = inp.files; if (!fl || !fl.length) return;
   var room = 5 - INQ.shots.length;
-  if (room <= 0) { document.getElementById('iq-prev').innerHTML = '<div class="iq-opt">사진은 5장까지예요.</div>'; inp.value = ''; return; }
-  var list = [].slice.call(fl, 0, room);
   var pv = document.getElementById('iq-prev');
-  pv.innerHTML = '<div class="iq-opt">사진 준비 중…</div>';
-  var left = list.length;
-  list.forEach(function(f){
-    inqShrink(f, function(b64, mime, dataUrl){
-      if (b64) INQ.shots.push({ base64: b64, mime: mime || 'image/jpeg', url: dataUrl });
-      if (--left === 0) { pv.innerHTML = ''; inqRenderShots(); }
-    });
-  });
+  if (room <= 0) { pv.innerHTML = '<div class="iq-opt">사진은 5장까지예요.</div>'; inp.value = ''; return; }
+  var list = [].slice.call(fl, 0, room);
+  var over = fl.length - list.length;
   inp.value = '';
+  var i = 0, failed = 0;
+  (function next(){
+    if (i >= list.length) {
+      var tot = INQ.shots.reduce(function(a, s){ return a + s.base64.length; }, 0);
+      var note = '';
+      if (failed) note += '<div class="iq-opt" style="color:#E5484D;">사진 ' + failed + '장은 넣지 못했어요. 다시 골라 주세요.</div>';
+      if (over) note += '<div class="iq-opt">5장까지만 넣을 수 있어서 ' + over + '장은 뺐어요.</div>';
+      if (tot > INQ_MAX_TOTAL) note += '<div class="iq-opt" style="color:#E5484D;">사진이 너무 많아요. 한두 장 빼 주세요.</div>';
+      pv.innerHTML = note;
+      inqRenderShots();
+      return;
+    }
+    pv.innerHTML = '<div class="iq-opt">사진 준비 중… (' + (i + 1) + '/' + list.length + ')</div>';
+    inqShrink(list[i], function(b64, mime, dataUrl){
+      if (b64) INQ.shots.push({ base64: b64, mime: mime || 'image/jpeg', url: dataUrl });
+      else failed++;
+      i++;
+      setTimeout(next, 60);   // 한 숨 쉬고 다음 장 (메모리 반납 시간)
+    });
+  })();
 }
 function inqRenderShots(){
   var el = document.getElementById('iq-shots'); if (!el) return;
@@ -740,7 +763,13 @@ function inqSubmit(){
   var msg = document.getElementById('iq-msg').value.trim();
   if (!msg) { err.textContent = '문의 내용을 적어 주세요.'; err.classList.add('on'); return; }
   var w = inqWho();
-  var b = document.getElementById('iq-send'); b.disabled = true; b.textContent = '보내는 중…';
+  var tot = INQ.shots.reduce(function(a, s){ return a + s.base64.length; }, 0);
+  if (tot > INQ_MAX_TOTAL) {
+    err.textContent = '사진 용량이 너무 커요. 한두 장 빼고 다시 보내 주세요.';
+    err.classList.add('on'); return;
+  }
+  var b = document.getElementById('iq-send'); b.disabled = true;
+  b.textContent = INQ.shots.length ? ('보내는 중… (사진 ' + INQ.shots.length + '장)') : '보내는 중…';
   google.script.run.withSuccessHandler(function(r){
     b.disabled = false; b.textContent = '문의 보내기';
     if (r && r.ok) {
