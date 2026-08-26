@@ -394,7 +394,7 @@ function apiCall(fn,args,__apiTry){__apiTry=__apiTry||1;return fetch(API_BASE,{m
 function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto','getUploadStatus','submitInquiry','getMyInquiries','getInquiryPhoto'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
 window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
 
-var ST={ no:'', name:'', grade:0, classNo:0, qr:(new URLSearchParams(location.search).get('qr')||''), qrToken:(new URLSearchParams(location.search).get('t')||''), nrcB64:'', nrcMime:'', today:null, summary:null, dash:null, scope:'ind', gradeFilter:0 };
+var ST={ no:'', name:'', grade:0, classNo:0, qr:(new URLSearchParams(location.search).get('qr')||''), qrToken:(new URLSearchParams(location.search).get('t')||''), nrcB64:'', nrcMime:'', nrcFp:'', today:null, summary:null, dash:null, scope:'ind', gradeFilter:0 };
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});$('s-'+id).classList.add('active');var tb=$('tabbar');tb.style.display=(id==='home'||id==='rank'||id==='cum')?'flex':'none';window.scrollTo(0,0);}
@@ -585,16 +585,17 @@ function shrinkImage(file, cb){
         try {
           var MAX = 1100, w = img.width, h = img.height;   // [v2.59] 전송량 절반으로
           var scale = Math.min(1, MAX / Math.max(w, h));
-          if (scale >= 1 && file.size <= 400*1024) { cb(ev.target.result.split(',')[1], file.type); return; }
+          if (scale >= 1 && file.size <= 400*1024) { cb(ev.target.result.split(',')[1], file.type, photoFingerprint(img)); return; }   // [v2.66]
           var cw = Math.round(w*scale), ch = Math.round(h*scale);
+          var fp = photoFingerprint(img);   // [v2.66] 줄이기 전 원본에서 지문
           var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
           var cx = cv.getContext('2d');
           cx.fillStyle = '#fff'; cx.fillRect(0,0,cw,ch);
           cx.drawImage(img, 0, 0, cw, ch);
-          cb(cv.toDataURL('image/jpeg', 0.75).split(',')[1], 'image/jpeg');
-        } catch(e){ cb(ev.target.result.split(',')[1], file.type); }
+          cb(cv.toDataURL('image/jpeg', 0.75).split(',')[1], 'image/jpeg', fp);
+        } catch(e){ cb(ev.target.result.split(',')[1], file.type, ''); }
       };
-      img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type); };
+      img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type, ''); };
       img.src = ev.target.result;
     };
     rd.readAsDataURL(file);
@@ -639,7 +640,7 @@ function previewNrc(input){
   if(!f.type.startsWith('image/')){showErr(e,'이미지 파일만 선택 가능합니다.');return;}
   if(f.size>10*1024*1024){showErr(e,'10MB 이하 파일만 가능합니다.');return;}
   ST.nrcMime=f.type;
-  shrinkImage(f,function(b64,mime){ ST.nrcB64=b64; ST.nrcMime=mime||f.type; });   // 전송용은 축소본
+  shrinkImage(f,function(b64,mime,fp){ ST.nrcB64=b64; ST.nrcMime=mime||f.type; ST.nrcFp=fp||''; });   // 전송용은 축소본 · [v2.66] 지문 함께
   var rd=new FileReader();
   rd.onload=function(ev){var p=$('nrc-prev');p.src=ev.target.result;p.style.display='block';$('drop').style.display='none';$('btn-nrc').disabled=false;};
   rd.readAsDataURL(f);
@@ -684,6 +685,7 @@ function upqPoll(){
 function submitNrc(force){
   if(!ST.nrcB64)return; var b=$('btn-nrc'); b.disabled=true; b.textContent='분석 중…'; anzStart();
   google.script.run.withSuccessHandler(function(r){
+    if (r && r.ok && r.dup) { renderDup(r); return; }   // [v2.66] 같은 사진 → 문의하기로
     if (r && r.ok && r.manual) { renderQueued(r); return; }   // [v2.65] 업로드만 받는 모드
     if (r && r.ok && r.queued) {   // [v2.60] 접수됨 → 결과를 물어본다
       anzSet(18, '사진을 접수했어요. 분석 중…');
@@ -695,7 +697,7 @@ function submitNrc(force){
     b.disabled=false;b.textContent='제출하기';anzEnd(!!(r&&r.ok));
     if(r&&r.needConfirm){ uiConfirm(r.reason+'\n\n다시 제출할까요?', function(){submitNrc(true);}, {okText:'다시 제출'}); return; }
     renderResult(r);go('result');})
-    .withFailureHandler(function(){b.disabled=false;b.textContent='제출하기';anzEnd(false);showErr($('nrc-err'),'제출 중 오류가 발생했습니다.');}).submitNrcPhoto(ST.no,ST.nrcB64,ST.nrcMime,'web',force===true);
+    .withFailureHandler(function(){b.disabled=false;b.textContent='제출하기';anzEnd(false);showErr($('nrc-err'),'제출 중 오류가 발생했습니다.');}).submitNrcPhoto(ST.no,ST.nrcB64,ST.nrcMime,'web',force===true,ST.nrcFp||'');
 }
 function renderResult(r){
   var ok=r.ok&&r.finalResult;
@@ -1366,6 +1368,64 @@ function renderQueued(r){
     +   '<button class="btn btn-ghost" style="margin-top:8px;" onclick="go(\'home\');loadHome();">홈으로</button>'
     + '</div>';
   loadHome();
+}
+</script>
+<script>
+/* ═══ [v2.66] 사진 내용 지문 (dHash 1024비트) ═══ */
+/* 33x32 로 줄여 흑백으로 만든 뒤, 가로로 이웃한 두 칸의 밝기를 견준다.
+   왼쪽이 뚜렷하게 밝으면 1, 아니면 0 → 32행 x 32비교 = 1024비트 = 16진수 256자리.
+   NRC 화면은 대부분 평평한 노란색이라, 밝기차가 거의 없는 칸은 압축 잡음으로 0/1이 뒤집힌다.
+   그래서 밝기차가 EPS 미만이면 무조건 0으로 고정한다(실측: 같은 화면 26비트, 다른 화면 75비트 이상 차이).
+   화면 속 «숫자» 가 다르면 비트가 많이 달라지고, 같은 사진이면 거의 그대로다. */
+function photoFingerprint(img){
+  try {
+    var W = 33, H = 32, EPS = 2;   // [v2.66] 1024비트 · 평평한 곳(밝기차 2 미만)은 0으로 고정
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var cx = cv.getContext("2d");
+    if (!cx) return "";
+    cx.fillStyle = "#fff"; cx.fillRect(0, 0, W, H);
+    cx.drawImage(img, 0, 0, W, H);
+    var px = cx.getImageData(0, 0, W, H).data;
+    var g = new Array(W * H);
+    for (var i = 0; i < W * H; i++) {
+      var o = i * 4;
+      g[i] = (px[o] * 299 + px[o + 1] * 587 + px[o + 2] * 114) / 1000;
+    }
+    var bits = "";
+    for (var y = 0; y < H; y++) {
+      for (var x = 0; x < W - 1; x++) {
+        bits += ((g[y * W + x] - g[y * W + x + 1]) > EPS) ? "1" : "0";
+      }
+    }
+    var hex = "";
+    for (var b = 0; b < bits.length; b += 4) hex += parseInt(bits.substr(b, 4), 2).toString(16);
+    return (hex.length === 256) ? hex : "";
+  } catch (e) { return ""; }
+}
+
+/* ═══ [v2.66] 같은 사진으로 걸렸을 때 — 문의하기로 안내 ═══ */
+function renderDup(r){
+  upqStop();
+  var b = $('btn-nrc'); if (b) { b.disabled = false; b.textContent = '제출하기'; }
+  anzEnd(false);
+  go('result');
+  var why = (r && r.sameStudent)
+    ? '전에 올렸던 사진과 <b>같은 사진</b>이에요.'
+    : '이미 올라와 있는 사진과 <b>같은 사진</b>으로 보여요.';
+  $('rs-body').innerHTML =
+    '<div class="succ-badge" style="background:#FFF1EB;color:#E2502F;"><span style="font-size:17px;margin-right:5px;">⚠️</span>확인이 필요해요</div>'
+    + '<div class="card" style="background:#fff;">'
+    +   '<div style="font-size:15px;font-weight:800;color:#2B211C;line-height:1.7;text-align:center;">' + why + '</div>'
+    +   '<div style="margin-top:14px;padding:13px 14px;background:#FFF4EC;border:1px solid #FBDDAE;border-radius:12px;font-size:13px;line-height:1.75;color:#8A6A55;">'
+    +     '<b style="display:block;color:#FF6A4A;margin-bottom:4px;">💬 문의하기로 보내주세요</b>'
+    +     '사진은 저장해 두었어요. 잘못 걸린 것 같거나 사정이 있으면<br>'
+    +     '아래 버튼으로 <b>어떤 상황인지</b> 적어서 보내주세요. 선생님이 직접 확인할게요.'
+    +   '</div>'
+    + '</div>'
+    + '<div class="pad" style="padding-top:6px;padding-bottom:20px;">'
+    +   '<button class="btn btn-cta" onclick="inqOpen()">💬 체육쌤께 문의하기</button>'
+    +   '<button class="btn btn-ghost" style="margin-top:8px;" onclick="go(\'home\');loadHome();">홈으로</button>'
+    + '</div>';
 }
 </script>
 </body>
