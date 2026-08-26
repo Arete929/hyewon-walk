@@ -417,6 +417,12 @@ function doLogin(){
 
 /* ── 오늘(홈) ── */
 function loadHome(){
+  /* [v2.67] 점심만 쉬는 날이면 만보기 카드 대신 안내를 보여 준다 */
+  var lOff = d.lunchOff && d.lunchOff.off;
+  var lunchCard = lOff
+    ? '<div class="card" style="background:#F4F6F8;border:1px dashed #C9D2DB;"><div class="mcard"><div class="tile walk ico" style="opacity:.45;"><img src="https://arete929.github.io/hyewon-walk/icons/walk.png"></div><div class="mid"><div class="t1" style="color:#5A6672;">점심 만보기 — 오늘은 쉬어요</div><div class="t2" style="color:#7A8794;">'+esc(d.lunchOff.reason||'학교 행사')+'(으)로 오늘 점심은 활동이 없어요.<br>아침 러닝은 그대로예요 🙂</div></div></div></div>'
+    : '<div class="card"><div class="mcard"><div class="tile walk ico"><img src="https://arete929.github.io/hyewon-walk/icons/walk.png"></div><div class="mid"><div class="t1">점심 만보기</div>'+lunchInfo+'</div></div>'+
+      '<div class="gauge"><i style="width:'+pct+'%"></i></div><div class="t2" style="margin-top:6px;color:var(--m);font-size:12px;">목표 '+goal.toLocaleString()+'보 · '+pct+'%</div></div>';
   $('hm-body').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
   google.script.run.withSuccessHandler(function(d){ST.today=d;renderHome(d);}).withFailureHandler(function(){$('hm-body').innerHTML='<p class="center muted" style="padding:30px;">불러오기 실패</p>';}).getMyToday(ST.no);
 }
@@ -567,8 +573,7 @@ function renderHome(d){
   $('hm-body').innerHTML=
     '<div class="label">오늘의 미션</div>'+
     '<div class="card"><div class="mcard"><div class="tile run ico"><img src="https://arete929.github.io/hyewon-walk/icons/run.png"></div><div class="mid"><div class="t1">아침 러닝</div><div class="t2">운동앱 기록 인증 (NRC·삼성헬스 등)</div></div>'+runBadge+'</div>'+runCta+'</div>'+
-    '<div class="card"><div class="mcard"><div class="tile walk ico"><img src="https://arete929.github.io/hyewon-walk/icons/walk.png"></div><div class="mid"><div class="t1">점심 만보기</div>'+lunchInfo+'</div></div>'+
-      '<div class="gauge"><i style="width:'+pct+'%"></i></div><div class="t2" style="margin-top:6px;color:var(--m);font-size:12px;">목표 '+goal.toLocaleString()+'보 · '+pct+'%</div></div>'+
+    lunchCard+
     '<div class="stat-row"><div class="stat grad"><div class="v">'+(d.day||'-')+'</div><div class="l">현재 일차</div></div><div class="stat white"><div class="v">'+(steps?'O':'-')+'</div><div class="l">점심 만보기</div></div></div>';
   if(done && d.day) loadMyPhoto(d.day);
 }
