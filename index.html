@@ -581,30 +581,40 @@ function renderHome(d){
 /* ── NRC 업로드 ── */
 
 /* UPLOAD-UX v1 — 업로드 전 축소 + 분석 진행률 */
+/* [v2.67.1] 사진 축소 — 원본을 그대로 보내는 일이 없게 단계적으로 줄인다.
+   실패하면 cb(null,...) 로 «못 줄였다» 를 분명히 알린다. */
+var NRC_MAX_B64 = 4 * 1024 * 1024;   // 보낼 수 있는 최대 크기(base64 기준)
 function shrinkImage(file, cb){
   try {
     var rd = new FileReader();
     rd.onload = function(ev){
       var img = new Image();
       img.onload = function(){
-        try {
-          var MAX = 1100, w = img.width, h = img.height;   // [v2.59] 전송량 절반으로
-          var scale = Math.min(1, MAX / Math.max(w, h));
-          if (scale >= 1 && file.size <= 400*1024) { cb(ev.target.result.split(',')[1], file.type, photoFingerprint(img)); return; }   // [v2.66]
-          var cw = Math.round(w*scale), ch = Math.round(h*scale);
-          var fp = photoFingerprint(img);   // [v2.66] 줄이기 전 원본에서 지문
-          var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
-          var cx = cv.getContext('2d');
-          cx.fillStyle = '#fff'; cx.fillRect(0,0,cw,ch);
-          cx.drawImage(img, 0, 0, cw, ch);
-          cb(cv.toDataURL('image/jpeg', 0.75).split(',')[1], 'image/jpeg', fp);
-        } catch(e){ cb(ev.target.result.split(',')[1], file.type, ''); }
+        var fp = "";
+        try { fp = photoFingerprint(img); } catch(e){ fp = ""; }
+        /* 1100 → 850 → 650 → 500 순으로 줄여 가며 4MB 안에 들어오는 첫 결과를 쓴다 */
+        var STEPS = [1100, 850, 650, 500], q = [0.75, 0.72, 0.70, 0.68];
+        for (var i = 0; i < STEPS.length; i++) {
+          try {
+            var w = img.width, h = img.height;
+            var scale = Math.min(1, STEPS[i] / Math.max(w, h));
+            var cw = Math.max(1, Math.round(w*scale)), ch = Math.max(1, Math.round(h*scale));
+            var cv = document.createElement("canvas"); cv.width = cw; cv.height = ch;
+            var cx = cv.getContext("2d");
+            cx.fillStyle = "#fff"; cx.fillRect(0,0,cw,ch);
+            cx.drawImage(img, 0, 0, cw, ch);
+            var b64 = cv.toDataURL("image/jpeg", q[i]).split(",")[1];
+            if (b64 && b64.length <= NRC_MAX_B64) { cb(b64, "image/jpeg", fp); return; }
+          } catch(e){ /* 다음 단계로 */ }
+        }
+        cb(null, null, fp);   // 끝까지 못 줄임 — 원본을 보내지는 않는다
       };
-      img.onerror = function(){ cb(ev.target.result.split(',')[1], file.type, ''); };
+      img.onerror = function(){ cb(null, null, ""); };
       img.src = ev.target.result;
     };
+    rd.onerror = function(){ cb(null, null, ""); };
     rd.readAsDataURL(file);
-  } catch(e){ cb(null, null); }
+  } catch(e){ cb(null, null, ""); }
 }
 
 /* 실제 진행률을 알 수 없으므로 단계별로 자연스럽게 차오르게 하고, 응답이 오면 100%로 마감 */
@@ -644,10 +654,16 @@ function previewNrc(input){
   var f=input.files[0]; if(!f)return; var e=$('nrc-err'); e.classList.remove('show');
   if(!f.type.startsWith('image/')){showErr(e,'이미지 파일만 선택 가능합니다.');return;}
   if(f.size>10*1024*1024){showErr(e,'10MB 이하 파일만 가능합니다.');return;}
-  ST.nrcMime=f.type;
-  shrinkImage(f,function(b64,mime,fp){ ST.nrcB64=b64; ST.nrcMime=mime||f.type; ST.nrcFp=fp||''; });   // 전송용은 축소본 · [v2.66] 지문 함께
+  ST.nrcMime=f.type; ST.nrcB64=''; ST.nrcFp='';
+  /* [v2.67.1] 축소가 끝나야 제출 버튼을 켠다 — 안 그러면 눌러도 아무 반응이 없다 */
+  var btn=$('btn-nrc'); if(btn){ btn.disabled=true; btn.textContent='사진 준비 중…'; }
+  shrinkImage(f,function(b64,mime,fp){
+    ST.nrcB64=b64||''; ST.nrcMime=mime||f.type; ST.nrcFp=fp||'';
+    if(btn){ btn.textContent='제출하기'; btn.disabled=!b64; }
+    if(!b64) showErr(e,'사진이 너무 커서 보낼 수 없어요. 캡처를 다시 하거나 다른 사진으로 올려 주세요.');
+  });
   var rd=new FileReader();
-  rd.onload=function(ev){var p=$('nrc-prev');p.src=ev.target.result;p.style.display='block';$('drop').style.display='none';$('btn-nrc').disabled=false;};
+  rd.onload=function(ev){var p=$('nrc-prev');p.src=ev.target.result;p.style.display='block';$('drop').style.display='none';};
   rd.readAsDataURL(f);
 }
 /* [v2.60] 업로드는 접수만(2초) → 서버 트리거가 분석 → 4초마다 결과를 물어본다.
