@@ -287,6 +287,21 @@
 #ma-bar b{color:#fff;}
 #ma-bar .x{margin-left:auto;background:rgba(255,255,255,.16);color:#fff;border:none;border-radius:7px;
   padding:5px 10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;}
+/* NOTICE v1 — 선생님이 보낸 공지 [v2.69] */
+.nt-wrap{margin:0 20px 12px;display:flex;flex-direction:column;gap:10px;}
+.nt{border-radius:16px;padding:14px 15px 13px;border:1px solid #FBDDAE;background:linear-gradient(160deg,#FFF6EE 0%,#FFEDE1 100%);box-shadow:0 4px 14px rgba(226,80,47,.08);}
+.nt.mine{border-color:#F7C9B8;background:linear-gradient(160deg,#FFF1EA 0%,#FFE3D6 100%);}
+.nt.done{background:#F7F8FA;border-color:#E4E8EC;box-shadow:none;padding:10px 14px;}
+.nt .nt-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#E2502F;margin-bottom:5px;}
+.nt.done .nt-h{color:#8A9199;margin-bottom:0;font-size:11.5px;}
+.nt .nt-t{font-size:15px;font-weight:800;color:#2B211C;line-height:1.5;margin-bottom:5px;}
+.nt .nt-b{font-size:13.5px;line-height:1.75;color:#6E5A4F;white-space:pre-line;}
+.nt .nt-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.nt .nt-btns button,.nt .nt-btns a{flex:1;min-width:120px;min-height:40px;border:none;border-radius:11px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;}
+.nt .nt-ok{background:#FF6A4A;color:#fff;box-shadow:0 4px 12px rgba(255,106,74,.28);}
+.nt .nt-ok:disabled{background:#DCE0E4;color:#8A9199;box-shadow:none;}
+.nt .nt-iq{background:#fff;color:#E2502F;border:1.5px solid #FBDDAE !important;}
+.nt .nt-when{font-size:11.5px;color:#A08D82;font-weight:700;margin-left:auto;}
 </style>
 </head>
 <body>
@@ -320,6 +335,7 @@
   <!-- 3. NRC 업로드 -->
   <div id="s-nrc" class="screen">
     <div class="nav"><button class="back" onclick="go('home')">←</button><h3>러닝 인증</h3></div>
+    <div class="nt-wrap" id="nt-nrc"></div>
     <p class="help">운동앱의 <b>운동 1건(걷기/러닝) 기록 화면</b>을 캡처해서 올려주세요. 거리·시간 숫자가 선명해야 분석이 정확해요.</p>
     <div class="anz" id="anz">
       <div class="t"><span>🤖 기록 분석 중</span><span class="pc" id="anz-pct">0%</span></div>
@@ -391,7 +407,7 @@
 /* [PWA] GAS API와 fetch 통신 — google.script.run 인터페이스 유지 */
 var API_BASE='https://script.google.com/macros/s/AKfycby_havXeiD6E9PkN3do6WE4wF6OhcM5XotBrPovh85GSrJxHE3jo0R1bx0LBUg1CVeZ/exec';
 function apiCall(fn,args,__apiTry){__apiTry=__apiTry||1;return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,token:localStorage.getItem('achim_token')||'',args:args||[]})}).then(function(r){return r.text();}).then(function(txt){var res;try{res=JSON.parse(txt);}catch(e){/* 구글이 JSON 대신 HTML을 준 경우 — 잠깐 쉬고 재시도 */if(__apiTry<3){return new Promise(function(ok){setTimeout(ok,600*__apiTry);}).then(function(){return apiCall(fn,args,__apiTry+1);});}throw new Error('서버 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');}if(res&&res.token)localStorage.setItem('achim_token',res.token);return res;});}
-function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto','getUploadStatus','submitInquiry','getMyInquiries','getInquiryPhoto'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
+function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto','getUploadStatus','submitInquiry','getMyInquiries','getInquiryPhoto','getNotice','ackNotice'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
 window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
 
 var ST={ no:'', name:'', grade:0, classNo:0, qr:(new URLSearchParams(location.search).get('qr')||''), qrToken:(new URLSearchParams(location.search).get('t')||''), nrcB64:'', nrcMime:'', nrcFp:'', today:null, summary:null, dash:null, scope:'ind', gradeFilter:0 };
@@ -417,6 +433,7 @@ function doLogin(){
 
 /* ── 오늘(홈) ── */
 function loadHome(){
+  if (!NT.loaded) ntLoad();   // [v2.69] 공지 한 번만 읽는다
   $('hm-body').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
   google.script.run.withSuccessHandler(function(d){ST.today=d;renderHome(d);}).withFailureHandler(function(){$('hm-body').innerHTML='<p class="center muted" style="padding:30px;">불러오기 실패</p>';}).getMyToday(ST.no);
 }
@@ -571,6 +588,7 @@ function renderHome(d){
     : '<div class="card"><div class="mcard"><div class="tile walk ico"><img src="https://arete929.github.io/hyewon-walk/icons/walk.png"></div><div class="mid"><div class="t1">점심 만보기</div>'+lunchInfo+'</div></div>'+
       '<div class="gauge"><i style="width:'+pct+'%"></i></div><div class="t2" style="margin-top:6px;color:var(--m);font-size:12px;">목표 '+goal.toLocaleString()+'보 · '+pct+'%</div></div>';
   $('hm-body').innerHTML=
+    '<div class="nt-wrap" id="nt-home">' + ntHtml() + '</div>'+
     '<div class="label">오늘의 미션</div>'+
     '<div class="card"><div class="mcard"><div class="tile run ico"><img src="https://arete929.github.io/hyewon-walk/icons/run.png"></div><div class="mid"><div class="t1">아침 러닝</div><div class="t2">운동앱 기록 인증 (NRC·삼성헬스 등)</div></div>'+runBadge+'</div>'+runCta+'</div>'+
     lunchCard+
@@ -1466,6 +1484,63 @@ function renderDup(r){
     +   '<button class="btn btn-cta" onclick="inqOpen()">💬 체육쌤께 문의하기</button>'
     +   '<button class="btn btn-ghost" style="margin-top:8px;" onclick="go(\'home\');loadHome();">홈으로</button>'
     + '</div>';
+}
+</script>
+<script>
+/* ═══ NOTICE v1 — 선생님이 보낸 공지 [v2.69] ═══ */
+var NT = { list: [], loaded: false };
+/* GAS 판은 google.script.run, PWA 판은 R() 프록시를 쓴다 */
+function ntRun(){ return (typeof R === 'function') ? R() : google.script.run; }
+
+function ntLoad(cb){
+  if (!ST.no) { if (cb) cb(); return; }
+  ntRun().withSuccessHandler(function(r){
+    NT.list = (r && r.ok && r.notices) ? r.notices : [];
+    NT.loaded = true;
+    ntRender();
+    if (cb) cb();
+  }).withFailureHandler(function(){ NT.loaded = true; if (cb) cb(); }).getNotice(ST.no);
+}
+
+function ntHtml(){
+  if (!NT.list.length) return '';
+  return NT.list.map(function(n){
+    var when = n.acked ? '' : '<span class="nt-when">' + esc(n.sentAt || '') + '</span>';
+    if (n.acked) {
+      return '<div class="nt done"><div class="nt-h">✓ 확인함 · ' + esc(n.title || '선생님 안내') + '</div></div>';
+    }
+    var link = n.link
+      ? '<a class="nt-iq" href="' + esc(n.link) + '" target="_blank" rel="noopener">🔗 자세히 보기</a>'
+      : '<button type="button" class="nt-iq" onclick="inqOpen()">💬 문의하기</button>';
+    return '<div class="nt' + (n.personal ? ' mine' : '') + '">'
+      + '<div class="nt-h">📢 ' + (n.personal ? '선생님이 보낸 안내' : '전체 안내') + when + '</div>'
+      + (n.title ? '<div class="nt-t">' + esc(n.title) + '</div>' : '')
+      + (n.body ? '<div class="nt-b">' + esc(n.body) + '</div>' : '')
+      + '<div class="nt-btns">'
+      +   link
+      +   '<button type="button" class="nt-ok" id="nt-ok-' + esc(n.no) + '" onclick="ntAck(\'' + esc(n.no) + '\')">✓ 확인했습니다</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function ntRender(){
+  ['nt-home','nt-nrc'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = ntHtml();
+  });
+}
+
+function ntAck(no){
+  var b = document.getElementById('nt-ok-' + no);
+  if (b) { b.disabled = true; b.textContent = '저장 중…'; }
+  ntRun().withSuccessHandler(function(r){
+    if (r && r.ok) {
+      NT.list.forEach(function(n){ if (String(n.no) === String(no)) n.acked = true; });
+      ntRender();
+    } else if (b) {
+      b.disabled = false; b.textContent = '✓ 확인했습니다';
+    }
+  }).withFailureHandler(function(){ if (b) { b.disabled = false; b.textContent = '✓ 확인했습니다'; } }).ackNotice(ST.no, no);
 }
 </script>
 </body>
