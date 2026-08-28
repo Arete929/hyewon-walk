@@ -376,6 +376,7 @@
   <!-- 5. 순위 -->
   <div id="s-rank" class="screen">
     <div class="home-head"><div class="greet"><div class="g2">🏆 순위</div></div></div>
+    <div class="nt-wrap" id="nt-rank"></div>
     <div class="seg"><button id="seg-ind" class="active" onclick="setScope('ind')">개인별</button><button id="seg-cls" onclick="setScope('cls')">학급별</button></div>
     <div class="chips" id="rk-chips"></div>
     <div class="scroll" id="rk-body"><div class="spin-wrap"><div class="spin"></div></div></div>
@@ -384,6 +385,7 @@
   <!-- 6. 누적 -->
   <div id="s-cum" class="screen">
     <div class="home-head"><div class="greet"><div class="g2"><img src="https://arete929.github.io/hyewon-walk/icons/cumstat.png" style="width:20px;height:20px;object-fit:contain;vertical-align:-4px;margin-right:4px">누적 현황</div></div></div>
+    <div class="nt-wrap" id="nt-cum"></div>
     <div class="scroll" id="cm-body"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
@@ -414,7 +416,7 @@ var ST={ no:'', name:'', grade:0, classNo:0, qr:(new URLSearchParams(location.se
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});$('s-'+id).classList.add('active');var tb=$('tabbar');tb.style.display=(id==='home'||id==='rank'||id==='cum')?'flex':'none';window.scrollTo(0,0);}
-function tab(id){go(id);['home','rank','cum'].forEach(function(t){$('tb-'+t).classList.toggle('active',t===id);});if(id==='home')loadHome();if(id==='rank')loadRank();if(id==='cum')loadCum();}
+function tab(id){go(id);if(typeof ntRender==='function')ntRender();['home','rank','cum'].forEach(function(t){$('tb-'+t).classList.toggle('active',t===id);});if(id==='home')loadHome();if(id==='rank')loadRank();if(id==='cum')loadCum();}
 function fmtDur(sec){sec=Number(sec)||0;var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
 function showErr(el,m){el.textContent=m;el.classList.add('show');}
 
@@ -1503,12 +1505,10 @@ function ntLoad(cb){
 }
 
 function ntHtml(){
-  if (!NT.list.length) return '';
-  return NT.list.map(function(n){
-    var when = n.acked ? '' : '<span class="nt-when">' + esc(n.sentAt || '') + '</span>';
-    if (n.acked) {
-      return '<div class="nt done"><div class="nt-h">✓ 확인함 · ' + esc(n.title || '선생님 안내') + '</div></div>';
-    }
+  var live = NT.list.filter(function(n){ return !n.acked; });   // [v2.70] 확인하면 사라진다
+  if (!live.length) return '';
+  return live.map(function(n){
+    var when = '<span class="nt-when">' + esc(n.sentAt || '') + '</span>';
     var link = n.link
       ? '<a class="nt-iq" href="' + esc(n.link) + '" target="_blank" rel="noopener">🔗 자세히 보기</a>'
       : '<button type="button" class="nt-iq" onclick="inqOpen()">💬 문의하기</button>';
@@ -1524,7 +1524,7 @@ function ntHtml(){
 }
 
 function ntRender(){
-  ['nt-home','nt-nrc'].forEach(function(id){
+  ['nt-home','nt-nrc','nt-rank','nt-cum'].forEach(function(id){
     var el = document.getElementById(id);
     if (el) el.innerHTML = ntHtml();
   });
