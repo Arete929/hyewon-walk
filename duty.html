@@ -273,7 +273,16 @@ function buildSignSheet(days, escFn, cname){
 }
 </script>
 <script>
-(function(){ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');var rf=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(rf)return;rf=true;location.reload();});} })();
+(function(){ if('serviceWorker' in navigator){
+  // 새 판을 «언제» 알아보는가 — 이게 없으면 백그라운드에 둔 앱은 옛 판을 계속 쓴다
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    reg.update();                                                                   // 열자마자
+    document.addEventListener('visibilitychange',function(){ if(!document.hidden)reg.update(); });  // 다시 앞으로 나올 때마다
+    setInterval(function(){ reg.update(); }, 30*60*1000);                           // 켜 둔 채로도 30분마다
+  });
+  var rf=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(rf)return;rf=true;location.reload();});
+} })();
 </script>
 <script>
 /* ═══ UI-DIALOG v1 [v2.49] — 브라우저 기본 대화상자 대체 ═══
