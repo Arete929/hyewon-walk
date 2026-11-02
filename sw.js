@@ -1,8 +1,8 @@
 /* 아침걷기 챌린지 PWA 서비스워커 | 버전 올리면 캐시 갱신·자동 새로고침 */
-var CACHE = 'achim-v1.56.0';
+var CACHE = 'achim-v1.57.0';
 var ASSETS = ['./', './index.html', './supporter.html', './teacher.html', './dashboard.html', './duty.html',
   './manifest.webmanifest', './manifest-teacher.webmanifest', './manifest-supporter.webmanifest', './manifest-dashboard.webmanifest', './manifest-duty.webmanifest',
-  './icon-192.png', './icon-512.png', './qr.html'];
+  './icon-192.png', './icon-512.png', './qr.html', './img/walk-girls.webp'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }).then(function () { return self.skipWaiting(); }));
