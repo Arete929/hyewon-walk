@@ -1,36 +1,57 @@
 <!DOCTYPE html>
-<!-- ▣ qr.html · 학생 화면 QR 띄우기(갤럭시탭용) · v1.0.0 · 2026-11-02
-     수정요약: 첫 판 — 제목 «2026 전환기 점심 걷기 챌린지» + 큰 QR. 화면을 누르면 전체화면, 켜 두는 동안 화면이 꺼지지 않게(Wake Lock). -->
+<!-- ▣ qr.html · 학생 화면 QR 띄우기(갤럭시탭용) · v1.1.0 · 2026-11-02
+     수정요약: [v1.1.0] 로그인 화면과 같은 모양 — 청록 머리 띠, 걷는 두 학생 그림, Gugi 청록 제목, 크림 바탕, QR 은 흰 카드. 가로 화면은 왼쪽 그림·제목 / 오른쪽 QR.
+     이전: [v1.0.0] 제목 + 큰 QR, 누르면 전체화면, 화면 꺼짐 방지(Wake Lock). -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#0b7f6f">
 <title>2026 전환기 점심 걷기 챌린지 · QR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#1d1d1f;--muted:#6e6e73;--blue:#0066cc;--bg:#fff;}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,system-ui,sans-serif;}
-.wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4vh;padding:20px;box-sizing:border-box;cursor:pointer;-webkit-user-select:none;user-select:none;}
-.t{font-family:'Gugi',sans-serif;font-size:clamp(28px,5.6vmin,72px);text-align:center;line-height:1.25;}
-.s{font-size:clamp(16px,2.6vmin,30px);color:var(--muted);text-align:center;}
-#qr{width:min(60vh,84vw);height:min(60vh,84vw);image-rendering:pixelated;}
-.u{font-size:clamp(13px,1.9vmin,22px);color:var(--blue);font-weight:600;word-break:break-all;text-align:center;}
-.hint{position:fixed;left:0;right:0;bottom:14px;text-align:center;font-size:13px;color:#aaa;transition:opacity .4s;}
-.ft{position:fixed;left:0;right:0;bottom:36px;text-align:center;font-size:11px;color:#c7c7cc;line-height:1.5;}
-body.fs .hint{opacity:0;}
+:root{--hd:#0b7f6f;--tt:#0b5e57;--cream:#fffaf0;--line:#e6e4dc;--mut:#6b6f6c;--cta:#f0506e;}
+html,body{margin:0;height:100%;background:var(--cream);color:#1d1d1f;font-family:Pretendard,-apple-system,system-ui,sans-serif;}
+body{display:flex;flex-direction:column;cursor:pointer;-webkit-user-select:none;user-select:none;}
+.hd{background:var(--hd);color:#fff;border-radius:0 0 28px 28px;padding:1.6vmin 3vmin;display:flex;align-items:center;gap:1.6vmin;flex:none;}
+.hd .av{width:6.4vmin;height:6.4vmin;min-width:40px;min-height:40px;border-radius:50%;background:#fff;overflow:hidden;border:2px solid rgba(255,255,255,.7);}
+.hd .av img{width:100%;height:100%;object-fit:cover;object-position:50% 6%;}
+.hd .nm{font-family:'Gugi',sans-serif;font-size:clamp(18px,3vmin,34px);flex:1;}
+.hd .tg{text-align:right;font-size:clamp(12px,1.9vmin,22px);line-height:1.4;font-weight:600;}
+.main{flex:1;display:flex;align-items:center;justify-content:center;gap:4vmin;padding:2.4vmin 4vmin;box-sizing:border-box;min-height:0;}
+.side{display:flex;flex-direction:column;align-items:center;text-align:center;}
+.hero{height:30vh;max-width:80vw;object-fit:contain;}
+.t{font-family:'Gugi',sans-serif;color:var(--tt);font-size:clamp(26px,5.4vmin,68px);line-height:1.25;margin-top:1.4vh;}
+.s{font-size:clamp(15px,2.6vmin,30px);color:var(--mut);font-weight:700;margin-top:1vh;}
+.s b{color:var(--cta);}
+.card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:2.6vmin;box-shadow:0 2px 14px rgba(0,0,0,.05);display:flex;flex-direction:column;align-items:center;gap:1.2vmin;}
+#qr{width:min(46vh,80vw);height:min(46vh,80vw);image-rendering:pixelated;display:block;}
+.u{font-size:clamp(12px,1.8vmin,20px);color:var(--hd);font-weight:700;word-break:break-all;text-align:center;}
+.ft{text-align:center;font-size:11px;color:#a9ada9;line-height:1.5;padding:0 0 8px;flex:none;}
+.hint{color:#b7bab6;}
+body.fs .hint,body.emb .hint{display:none;}
+body.emb{cursor:default;}
+/* 세로 화면 — 위아래로 */
+@media (orientation:portrait){ .main{flex-direction:column;gap:2.6vh;} .hero{height:22vh;} #qr{width:min(40vh,78vw);height:min(40vh,78vw);} }
+/* 가로 화면 — 왼쪽 그림·제목 / 오른쪽 QR */
+@media (orientation:landscape){ .side{max-width:48vw;} .hero{height:42vh;} #qr{width:min(62vh,44vw);height:min(62vh,44vw);} }
 </style>
 </head>
 <body>
-<div class="wrap" id="wrap">
-  <div class="t">2026 전환기 점심 걷기 챌린지</div>
-  <div class="s">휴대폰 카메라로 QR을 찍어 들어오세요</div>
-  <img id="qr" alt="학생 화면 QR">
-  <div class="u" id="u"></div>
+<div class="hd"><div class="av"><img src="img/walk-girls.webp" alt=""></div><div class="nm">전환기 점심 걷기</div><div class="tg">점심엔 함께,<br>걸어요 ♡</div></div>
+<div class="main">
+  <div class="side">
+    <img class="hero" src="img/walk-girls.webp" alt="함께 걷는 두 학생">
+    <div class="t">2026 전환기 점심 걷기 챌린지</div>
+    <div class="s">휴대폰 카메라로 <b>QR</b>을 찍어 들어오세요</div>
+  </div>
+  <div class="card">
+    <img id="qr" alt="학생 화면 QR">
+    <div class="u" id="u"></div>
+  </div>
 </div>
-<div class="ft">QR 띄우기 · v1.0.0 · 배포 2026-11-02 22:00 (KST)<br>ⓒKIMJINHO</div>
-<div class="hint" id="hint">화면을 한 번 누르면 전체화면이 됩니다</div>
+<div class="ft"><span class="hint">화면을 한 번 누르면 전체화면이 됩니다 · </span>QR 띄우기 · v1.1.0 · 배포 2026-11-02 23:41 (KST) · ⓒKIMJINHO</div>
 <script>
 (function(){
   // 학생 앱 주소 = 이 파일과 같은 폴더(?url= 로 바꿀 수 있음)
@@ -38,13 +59,15 @@ body.fs .hint{opacity:0;}
   var u = q || location.href.replace(/[^\/]*([?#].*)?$/, '');
   document.getElementById('u').textContent = u;
   document.getElementById('qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=10&data=' + encodeURIComponent(u);
+  if (new URLSearchParams(location.search).get('embed')) document.body.classList.add('emb');   // 관리자 창 안에서는 안내 숨김(전체화면은 관리자 창 버튼으로)
 
   var lock = null;
   function wake(){ try { if (navigator.wakeLock && !lock) navigator.wakeLock.request('screen').then(function(l){ lock = l; l.addEventListener('release', function(){ lock = null; }); }).catch(function(){}); } catch (e) {} }
   document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') wake(); });
   wake();
 
-  document.getElementById('wrap').addEventListener('click', function(){
+  document.body.addEventListener('click', function(){
+    if (document.body.classList.contains('emb')) return;
     var d = document.documentElement;
     if (document.fullscreenElement || document.webkitFullscreenElement) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
     var r = d.requestFullscreen || d.webkitRequestFullscreen;
