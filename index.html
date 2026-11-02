@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.85.0 · 2026-11-02
-     수정요약: [student v2.85] 로그인 화면을 혜원포털 모양으로(청록 머리 띠, 걷는 두 학생 그림, 학번 4칸·학생코드 9칸, 분홍 «로그인하기»), 버전 바닥글. [v2.84.1] 학번도 4칸 박스. [v2.84] 로그인 화면을 혜원핏 모양으로(학번 한 줄, 학생코드 3-3-3 박스, 안내 문구), 원래 로고가 잠깐 비치던 것 막음. [v2.83] 홈 «점심 만보기» 카드 뺌, «아침 러닝» → «점심 걷기». [v2.82] 달력에 챌린지 날이 있는 주만 표시. [v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
+<!-- ▣ index.html · 학생 앱 · v2.86.0 · 2026-11-03
+     수정요약: [student v2.86] 학생코드만(생년월일 방식 없앰, 기본 9칸). [v2.85] 로그인 화면을 혜원포털 모양으로(청록 머리 띠, 걷는 두 학생 그림, 학번 4칸·학생코드 9칸, 분홍 «로그인하기»), 버전 바닥글. [v2.84.1] 학번도 4칸 박스. [v2.84] 로그인 화면을 혜원핏 모양으로(학번 한 줄, 학생코드 3-3-3 박스, 안내 문구), 원래 로고가 잠깐 비치던 것 막음. [v2.83] 홈 «점심 만보기» 카드 뺌, «아침 러닝» → «점심 걷기». [v2.82] 달력에 챌린지 날이 있는 주만 표시. [v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
      이전: [student v2.80] 애플 스타일 디자인 + 선 아이콘 + 홈에 챌린지 달력(참여 여부) + 기록 올리기에서 달력으로 날짜를 골라 지난 기록 입력 + 관리자가 올린 로고. 서버 v2.76.0.
      이전: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
@@ -525,7 +525,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
         <p class="pt-hint">혜원핏에서 쓰던 학생코드를 입력하세요</p>
         <button class="btn pt-cta" id="btn-login" onclick="doLogin()">로그인하기</button>
       </div>
-      <div class="login-foot pt-ft"><span class="pt-ftt">2026 전환기 점심 걷기 챌린지</span> · v2.85.0 · 배포 2026-11-02 23:28 (KST)<br>ⓒKIMJINHO</div>
+      <div class="login-foot pt-ft"><span class="pt-ftt">2026 전환기 점심 걷기 챌린지</span> · v2.86.0 · 배포 2026-11-03 00:14 (KST)<br>ⓒKIMJINHO</div>
     </div>
   </div>
 
@@ -2083,8 +2083,8 @@ function ccClosePicker(){ var o = document.getElementById('cc-sheet'); if (o) o.
   var no = document.getElementById('inp-student-no'), pw = document.getElementById('inp-pw');
   var wNo = document.getElementById('otp-no'), wPw = document.getElementById('otp'), lb = document.getElementById('lb-pw');
   if (!no || !pw || !wPw) return;
-  var CFG = { mode: '생년월일', len: 6 };
-  try { var c = JSON.parse(localStorage.getItem('achim_login') || 'null'); if (c && c.len) CFG = c; } catch (e) {}
+  var CFG = { mode: '학생코드', len: 9 };   // [v2.86] 학생코드만 쓴다
+  try { var c = JSON.parse(localStorage.getItem('achim_login') || 'null'); if (c && c.len && c.mode === '학생코드') CFG = c; } catch (e) {}
   function isCode(){ return CFG.mode === '학생코드'; }
   function paint(inp, wrap, mask){
     var v = inp.value, bs = wrap.querySelectorAll('.bx'), foc = document.activeElement === inp;
@@ -2120,7 +2120,7 @@ function ccClosePicker(){ var o = document.getElementById('cc-sheet'); if (o) o.
   pw.addEventListener('input', paintPw); pw.addEventListener('focus', paintPw); pw.addEventListener('blur', paintPw);
   window.__loginCfg = function(l){
     if (!l || !l.len) return;
-    var n = { mode: l.mode === '학생코드' ? '학생코드' : '생년월일', len: Math.min(Math.max(Number(l.len) || 6, 4), 12) };
+    var n = { mode: '학생코드', len: Math.min(Math.max(Number(l.len) || 9, 4), 12) };
     try { localStorage.setItem('achim_login', JSON.stringify(n)); } catch (e) {}
     if (n.mode !== CFG.mode || n.len !== CFG.len) { CFG = n; build(); }
   };
