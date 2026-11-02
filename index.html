@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.81.1 · 2026-11-02
-     수정요약: [student v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
+<!-- ▣ index.html · 학생 앱 · v2.82.0 · 2026-11-02
+     수정요약: [student v2.82] 달력에 챌린지 날이 있는 주만 표시. [v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
      이전: [student v2.80] 애플 스타일 디자인 + 선 아이콘 + 홈에 챌린지 달력(참여 여부) + 기록 올리기에서 달력으로 날짜를 골라 지난 기록 입력 + 관리자가 올린 로고. 서버 v2.76.0.
      이전: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
@@ -1757,10 +1757,24 @@ function ccCardInner(mode){
       + '<button type="button" class="cc-nb" ' + (mi >= months.length - 1 ? 'disabled' : '') + ' onclick="ccShift(1,\'' + mode + '\')" aria-label="다음 달">' + chev('m9 6 6 6-6 6') + '</button></div>' : '') + '</div>';
   if (mode === 'home') h += '<div class="cc-sum"><span>참여 <b>' + done + '</b>일 · 지금까지 <b>' + elapsed + '</b>일 중</span><div class="cc-bar"><i style="width:' + (total ? Math.round(done / total * 100) : 0) + '%"></i></div><span>' + done + '/' + total + '</span></div>';
   h += '<div class="cc-wd">' + ['일', '월', '화', '수', '목', '금', '토'].map(function(w, i){ return '<span class="' + (i === 0 ? 'su' : i === 6 ? 'sa' : '') + '">' + w + '</span>'; }).join('') + '</div><div class="cc-grid">';
-  for (var i = 0; i < first; i++) h += '<div></div>';
+  // [v2.82] 챌린지 날이 하루도 없는 주(줄)는 그리지 않는다
+  var cells = [], wk = [], wkHas = false;
+  function flush(){ if (wkHas) { while (wk.length < 7) wk.push('<div></div>'); cells = cells.concat(wk); } wk = []; wkHas = false; }
+  for (var i = 0; i < first; i++) wk.push('<div></div>');
   for (var d = 1; d <= last; d++) {
     var iso = CC.month + '-' + (d < 10 ? '0' : '') + d, m = map[iso];
-    if (!m) { h += '<div class="cc-d"><span class="n">' + d + '</span><span class="st"></span></div>'; continue; }
+    if (m) wkHas = true;
+    wk.push(ccCell(mode, d, iso, m, today));
+    if (wk.length === 7) flush();
+  }
+  flush();
+  h += cells.join('');
+  h += '</div><div class="cc-leg"><span><i style="background:#d9f3e2"></i>참여</span><span><i style="background:#ff3b30;border-radius:50%;width:7px;height:7px"></i>미참여</span><span><i style="box-shadow:inset 0 0 0 2px #0066cc;background:#fff"></i>오늘</span>'
+    + (mode === 'pick' ? '<span><i style="background:#0066cc"></i>선택</span>' : '') + '</div>';
+  return h;
+}
+function ccCell(mode, d, iso, m, today){
+    if (!m) return '<div class="cc-d"><span class="n">' + d + '</span><span class="st"></span></div>';
     var cls = 'cc-d ch', st = '';
     if (m.participated) { cls += ' done'; st = '<i></i>'; }
     else if (iso < today) { cls += ' miss'; st = '<i></i>'; }
@@ -1769,11 +1783,7 @@ function ccCardInner(mode){
     var click = '';
     if (mode === 'home') { if (iso <= today) click = ' onclick="ccOpen(\'' + iso + '\')"'; }
     else { if (iso === CC.sel) cls += ' sel'; if (ccAllowed(iso)) click = ' onclick="ccPick(\'' + iso + '\')"'; else cls += ' lock'; }
-    h += '<button type="button" class="' + cls + '"' + click + '><span class="n">' + d + '</span><span class="st">' + st + '</span></button>';
-  }
-  h += '</div><div class="cc-leg"><span><i style="background:#d9f3e2"></i>참여</span><span><i style="background:#ff3b30;border-radius:50%;width:7px;height:7px"></i>미참여</span><span><i style="box-shadow:inset 0 0 0 2px #0066cc;background:#fff"></i>오늘</span>'
-    + (mode === 'pick' ? '<span><i style="background:#0066cc"></i>선택</span>' : '') + '</div>';
-  return h;
+    return '<button type="button" class="' + cls + '"' + click + '><span class="n">' + d + '</span><span class="st">' + st + '</span></button>';
 }
 function ccRetry(){ ccLoadSummary(function(){ ccRenderHome(); ccRenderPick(); }, true); }
 function ccShift(dir, mode){
