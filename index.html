@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.81.0 · 2026-11-02
-     수정요약: [student v2.81] 학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
+<!-- ▣ index.html · 학생 앱 · v2.81.1 · 2026-11-02
+     수정요약: [student v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
      이전: [student v2.80] 애플 스타일 디자인 + 선 아이콘 + 홈에 챌린지 달력(참여 여부) + 기록 올리기에서 달력으로 날짜를 골라 지난 기록 입력 + 관리자가 올린 로고. 서버 v2.76.0.
      이전: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
@@ -2039,7 +2039,7 @@ function ccClosePicker(){ var o = document.getElementById('cc-sheet'); if (o) o.
   function paint(inp, wrap, mask){
     var v = inp.value, bs = wrap.querySelectorAll('.bx'), foc = document.activeElement === inp;
     for (var i = 0; i < bs.length; i++) {
-      bs[i].textContent = v.charAt(i) ? (mask ? '•' : v.charAt(i)) : '';
+      bs[i].textContent = v.charAt(i) ? (mask ? '•' : v.charAt(i).toUpperCase()) : '';
       bs[i].classList.toggle('on', foc && i === Math.min(v.length, bs.length - 1));
     }
   }
@@ -2055,6 +2055,7 @@ function ccClosePicker(){ var o = document.getElementById('cc-sheet'); if (o) o.
     boxes(wPw, pw, CFG.len);
     lb.textContent = isCode() ? '학생코드' : '생년월일 뒤 6자리';
     pw.setAttribute('inputmode', isCode() ? 'text' : 'numeric');
+    pw.setAttribute('autocapitalize', isCode() ? 'characters' : 'off');   // 학생코드는 전부 대문자 — 자판을 대문자로 연다(서버는 대소문자 구분 안 함)
     paintPw();
   }
   no.addEventListener('input', function(){
