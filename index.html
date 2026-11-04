@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.87.0 · 2026-11-03
-     수정요약: [student v2.87] 홈 화면 아이콘을 관리자 설정에서 고른 것으로(두 학생·크림 / 두 학생·청록 / 아침걷기). [v2.86.1] 앱 이름·탭 제목 «전환기 점심 걷기», 홈 화면 아이콘을 두 학생 그림으로. [v2.86] 학생코드만(생년월일 방식 없앰, 기본 9칸). [v2.85] 로그인 화면을 혜원포털 모양으로(청록 머리 띠, 걷는 두 학생 그림, 학번 4칸·학생코드 9칸, 분홍 «로그인하기»), 버전 바닥글. [v2.84.1] 학번도 4칸 박스. [v2.84] 로그인 화면을 혜원핏 모양으로(학번 한 줄, 학생코드 3-3-3 박스, 안내 문구), 원래 로고가 잠깐 비치던 것 막음. [v2.83] 홈 «점심 만보기» 카드 뺌, «아침 러닝» → «점심 걷기». [v2.82] 달력에 챌린지 날이 있는 주만 표시. [v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
+<!-- ▣ index.html · 학생 앱 · v2.88.0 · 2026-11-04
+     수정요약: [student v2.88] 아래 메뉴에 «선곡» 탭 — 걷기 때 들을 곡 추천(기준: BPM 160↑·K-pop·발라드 금지·선정/폭력 가사 제외), 선정된 곡 TOP·♥ 공감, 내가 추천한 곡(서버 v2.82.0). [v2.87] 홈 화면 아이콘을 관리자 설정에서 고른 것으로(두 학생·크림 / 두 학생·청록 / 아침걷기). [v2.86.1] 앱 이름·탭 제목 «전환기 점심 걷기», 홈 화면 아이콘을 두 학생 그림으로. [v2.86] 학생코드만(생년월일 방식 없앰, 기본 9칸). [v2.85] 로그인 화면을 혜원포털 모양으로(청록 머리 띠, 걷는 두 학생 그림, 학번 4칸·학생코드 9칸, 분홍 «로그인하기»), 버전 바닥글. [v2.84.1] 학번도 4칸 박스. [v2.84] 로그인 화면을 혜원핏 모양으로(학번 한 줄, 학생코드 3-3-3 박스, 안내 문구), 원래 로고가 잠깐 비치던 것 막음. [v2.83] 홈 «점심 만보기» 카드 뺌, «아침 러닝» → «점심 걷기». [v2.82] 달력에 챌린지 날이 있는 주만 표시. [v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
      이전: [student v2.80] 애플 스타일 디자인 + 선 아이콘 + 홈에 챌린지 달력(참여 여부) + 기록 올리기에서 달력으로 날짜를 골라 지난 기록 입력 + 관리자가 올린 로고. 서버 v2.76.0.
      이전: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
@@ -516,6 +516,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
 #s-login .pt-cta::after{content:'›';font-size:26px;font-weight:600;line-height:1;}
 #s-login .pt-cta:active{box-shadow:none;}
 .pt-ft{color:#8a8f8c;font-size:12px;line-height:1.6;}
+/* [v2.88] 추천 선곡 */
+.sg-rule{background:#FFF7EF;border:1px solid #FFE0C7;}
+.sg-h{font-size:15px;font-weight:800;margin-bottom:8px;}
+.sg-li{display:flex;gap:8px;font-size:14px;line-height:1.5;margin:6px 0;}.sg-li b{color:#E2502F;}
+.sg-sec{font-size:16px;font-weight:800;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px;}.sg-sec small{font-size:12px;color:var(--m);font-weight:700;}
+.sg-lb{font-size:13px;font-weight:800;color:var(--m3);margin:12px 0 6px;}.sg-lb span{color:var(--m2);font-weight:600;}
+.sg-chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--m3);margin:14px 0 2px;line-height:1.5;cursor:pointer;}
+.sg-chk input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--primary);}
+.sg-st{font-size:12px;color:#1a8a5a;text-align:center;margin-top:8px;font-weight:700;min-height:16px;}
+.sg-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--div);}.sg-row:first-child{border-top:none;}
+.sg-n{width:22px;font-weight:800;color:var(--primary);text-align:center;}
+.sg-mid{flex:1;min-width:0;}.sg-mid .a{font-weight:800;font-size:15px;overflow-wrap:anywhere;}.sg-mid .b{font-size:12.5px;color:var(--m);margin-top:2px;}
+.sg-lk{border:1px solid #ffc9bd;background:#fff;color:#E2502F;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;}
+.sg-lk.on{background:#F0506E;border-color:#F0506E;color:#fff;}
+.sg-tag{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+.sg-tag.w{background:#FFF3D6;color:#A56A00;}.sg-tag.ok{background:#E5F6EC;color:#1a8a5a;}.sg-tag.no{background:#EEF0F3;color:#7A8794;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
 </head>
@@ -538,7 +554,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
         <p class="pt-hint">혜원핏에서 쓰던 학생코드를 입력하세요</p>
         <button class="btn pt-cta" id="btn-login" onclick="doLogin()">로그인하기</button>
       </div>
-      <div class="login-foot pt-ft"><span class="pt-ftt">2026 전환기 점심 걷기 챌린지</span> · v2.87.0 · 배포 2026-11-03 20:13 (KST)<br>ⓒKIMJINHO</div>
+      <div class="login-foot pt-ft"><span class="pt-ftt">2026 전환기 점심 걷기 챌린지</span> · v2.88.0 · 배포 2026-11-04 14:40 (KST)<br>ⓒKIMJINHO</div>
     </div>
   </div>
 
@@ -603,6 +619,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
     <div class="scroll" id="cm-body"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
+  <!-- 6-1. 추천 선곡 [v2.88] -->
+  <div id="s-song" class="screen">
+    <div class="home-head"><div class="greet"><div class="g2"><img src="https://arete929.github.io/hyewon-walk/icons/music.png" style="width:26px;height:26px;object-fit:contain;vertical-align:-6px;margin-right:6px">추천 선곡</div><div class="g1" style="margin-top:4px;">점심 걷기 때 들을 신나는 노래를 추천해요</div></div></div>
+    <div class="scroll" id="sg-body">
+      <div class="card sg-rule"><div class="sg-h">🎧 이런 곡을 추천해 주세요</div>
+        <div class="sg-li">⚡ <span><b>BPM 160 이상</b> 신나고 빠른 곡</span></div>
+        <div class="sg-li">🇰🇷 <span>가능하면 <b>K-pop</b></span></div>
+        <div class="sg-li">🚫 <span><b>발라드</b>는 안 돼요</span></div>
+        <div class="sg-li">🚫 <span><b>선정적·폭력적인 가사</b>가 있는 곡은 빼 주세요</span></div>
+      </div>
+      <div class="card"><div class="sg-sec">✏️ 곡 추천하기</div>
+        <div class="sg-lb">곡 제목</div><input class="input" id="sg-title" maxlength="60" placeholder="예) Supernova" autocomplete="off">
+        <div class="sg-lb">가수</div><input class="input" id="sg-artist" maxlength="40" placeholder="예) aespa" autocomplete="off">
+        <div class="sg-lb">추천 이유 <span>(선택)</span></div><input class="input" id="sg-why" maxlength="80" placeholder="예) 걸을 때 발이 저절로 빨라져요" autocomplete="off">
+        <label class="sg-chk"><input type="checkbox" id="sg-agree"><span>위 기준(발라드 아님 · 신나는 곡 · 가사 괜찮음)을 지켰어요</span></label>
+        <div id="sg-err" class="err"></div>
+        <button class="btn btn-cta" id="sg-btn" style="margin-top:12px;" onclick="songSubmit()"><img class="btn-ic" src="https://arete929.github.io/hyewon-walk/icons/music.png">추천하기</button>
+        <div class="sg-st" id="sg-st"></div>
+      </div>
+      <div class="card"><div class="sg-sec">🔥 모두의 추천 TOP <small>선생님이 확인한 곡</small></div><div id="sg-top"><div class="spin-wrap"><div class="spin"></div></div></div></div>
+      <div class="card"><div class="sg-sec">📮 내가 추천한 곡</div><div id="sg-mine"></div></div>
+    </div>
+  </div>
+
   <!-- 7. QR 체크인(학교 QR 스캔 시) -->
   <div id="s-qr" class="screen">
     <div class="nav"><h3 id="qr-title">📍 아침 체크인</h3></div>
@@ -616,6 +656,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
     <button id="tb-home" class="active" onclick="tab('home')"><span class="ti"><img src="https://arete929.github.io/hyewon-walk/icons/today.png"></span>오늘</button>
     <button id="tb-cum" onclick="tab('cum')"><span class="ti"><img src="https://arete929.github.io/hyewon-walk/icons/cum.png"></span>누적</button>
     <button id="tb-rank" onclick="tab('rank')"><span class="ti"><img src="https://arete929.github.io/hyewon-walk/icons/rank.png"></span>순위</button>
+    <button id="tb-song" onclick="tab('song')"><span class="ti"><img src="https://arete929.github.io/hyewon-walk/icons/music.png"></span>선곡</button>
   </div>
 </div>
 
@@ -623,14 +664,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
 /* [PWA] GAS API와 fetch 통신 — google.script.run 인터페이스 유지 */
 var API_BASE='https://script.google.com/macros/s/AKfycby_havXeiD6E9PkN3do6WE4wF6OhcM5XotBrPovh85GSrJxHE3jo0R1bx0LBUg1CVeZ/exec';
 function apiCall(fn,args,__apiTry){__apiTry=__apiTry||1;return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,token:localStorage.getItem('achim_token')||'',args:args||[]})}).then(function(r){return r.text();}).then(function(txt){var res;try{res=JSON.parse(txt);}catch(e){/* 구글이 JSON 대신 HTML을 준 경우 — 잠깐 쉬고 재시도 */if(__apiTry<3){return new Promise(function(ok){setTimeout(ok,600*__apiTry);}).then(function(){return apiCall(fn,args,__apiTry+1);});}throw new Error('서버 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');}if(res&&res.token)localStorage.setItem('achim_token',res.token);return res;});}
-function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto','getUploadStatus','submitInquiry','getMyInquiries','getInquiryPhoto','getNotice','ackNotice','getPublicConfig'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
+function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto','getUploadStatus','submitInquiry','getMyInquiries','getInquiryPhoto','getNotice','ackNotice','getPublicConfig','getSongs','submitSong','likeSong'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
 window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
 
 var ST={ no:'', name:'', grade:0, classNo:0, qr:(new URLSearchParams(location.search).get('qr')||''), qrToken:(new URLSearchParams(location.search).get('t')||''), nrcB64:'', nrcMime:'', nrcFp:'', today:null, summary:null, dash:null, scope:'ind', gradeFilter:0 };
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});$('s-'+id).classList.add('active');var tb=$('tabbar');tb.style.display=(id==='home'||id==='rank'||id==='cum')?'flex':'none';window.scrollTo(0,0);}
-function tab(id){go(id);if(typeof ntRender==='function')ntRender();['home','rank','cum'].forEach(function(t){$('tb-'+t).classList.toggle('active',t===id);});if(id==='home')loadHome();if(id==='rank')loadRank();if(id==='cum')loadCum();}
+function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});$('s-'+id).classList.add('active');var tb=$('tabbar');tb.style.display=(id==='home'||id==='rank'||id==='cum'||id==='song')?'flex':'none';window.scrollTo(0,0);}
+function tab(id){go(id);if(typeof ntRender==='function')ntRender();['home','rank','cum','song'].forEach(function(t){$('tb-'+t).classList.toggle('active',t===id);});if(id==='song')loadSong();if(id==='home')loadHome();if(id==='rank')loadRank();if(id==='cum')loadCum();}
 function fmtDur(sec){sec=Number(sec)||0;var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
 function showErr(el,m){el.textContent=m;el.classList.add('show');}
 
@@ -1937,6 +1978,44 @@ function ccClosePicker(){ var o = document.getElementById('cc-sheet'); if (o) o.
     apply(d.logo, d.challengeName);
   }).getPublicConfig();
 })();
+</script>
+<script>
+/* ═══ [v2.88] 추천 선곡 — 학생 추천 → 선생님이 선정한 곡만 TOP 에, ♥ 공감 ═══ */
+function songRender(d){
+  if(!d||!d.ok){$('sg-top').innerHTML='<p class="muted center" style="padding:12px 0;">불러오지 못했어요</p>';return;}
+  var top=d.top||[], mine=d.mine||[];
+  $('sg-top').innerHTML=top.length?top.map(function(s,i){
+    return '<div class="sg-row"><div class="sg-n">'+(i+1)+'</div><div class="sg-mid"><div class="a">'+esc(s.title)+'</div><div class="b">'+esc(s.artist)+' · 추천 '+s.recs+'명</div></div>'
+      +'<button class="sg-lk'+(s.liked?' on':'')+'" onclick="songLike('+s.id+',this)">'+(s.liked?'♥':'♡')+' '+s.likes+'</button></div>';
+  }).join(''):'<p class="muted" style="font-size:13.5px;line-height:1.6;margin:4px 0;">아직 선정된 곡이 없어요.<br>먼저 추천해 주세요 🙂</p>';
+  var TAG={'확인 중':'w','선정':'ok','숨김':'no'}, TXT={'확인 중':'확인 중','선정':'선정됨','숨김':'선정 안 됨'};
+  $('sg-mine').innerHTML=mine.length?mine.map(function(s){
+    return '<div class="sg-row"><div class="sg-mid"><div class="a">'+esc(s.title)+'</div><div class="b">'+esc(s.artist)+' · '+esc(s.at)+'</div></div><span class="sg-tag '+(TAG[s.status]||'w')+'">'+(TXT[s.status]||esc(s.status))+'</span></div>';
+  }).join(''):'<p class="muted" style="font-size:13.5px;margin:4px 0;">아직 추천한 곡이 없어요.</p>';
+  if(d.savedAt&&!$('sg-st').dataset.now)$('sg-st').textContent='마지막 추천 · '+d.savedAt;
+}
+function loadSong(){
+  google.script.run.withSuccessHandler(songRender).withFailureHandler(function(){songRender(null);}).getSongs(ST.no);
+}
+function songSubmit(){
+  var t=$('sg-title').value.trim(), a=$('sg-artist').value.trim(), w=$('sg-why').value.trim(), e=$('sg-err'), b=$('sg-btn');
+  e.classList.remove('show');
+  if(!t||!a){showErr(e,'곡 제목과 가수를 모두 써 주세요.');return;}
+  if(!$('sg-agree').checked){showErr(e,'추천 기준을 지켰는지 체크해 주세요.');return;}
+  b.disabled=true;
+  google.script.run.withSuccessHandler(function(d){
+    b.disabled=false;
+    if(!d||!d.ok){showErr(e,(d&&d.reason)||'추천하지 못했어요.');return;}
+    $('sg-title').value='';$('sg-artist').value='';$('sg-why').value='';$('sg-agree').checked=false;
+    var st=$('sg-st'); st.dataset.now='1'; st.textContent='✅ 추천됨 · '+d.savedAt;
+    songRender(d);
+  }).withFailureHandler(function(){b.disabled=false;showErr(e,'인터넷 연결을 확인하고 다시 눌러 주세요.');}).submitSong(ST.no,t,a,w,true);
+}
+function songLike(id,el){
+  if(el)el.disabled=true;
+  google.script.run.withSuccessHandler(function(d){ if(d&&d.ok)songRender(d); else if(el)el.disabled=false; })
+    .withFailureHandler(function(){if(el)el.disabled=false;}).likeSong(ST.no,id);
+}
 </script>
 <script>
 /* ═══ 선 아이콘 — 화면에 나오는 이모지를 선(line) 아이콘으로 바꾼다 [admin v2.68] ═══
