@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- ▣ index.html · 학생 앱 · v2.89.0 · 2026-11-04
-     수정요약: [student v2.89] 사진 올리는 동안 화면 가운데 링 게이지(%). 같은 날 다시 올리면 덮어씀(서버 v2.83.0). «선생님이 검토한 뒤 기록에 반영돼요» — 올리기 전·올린 뒤 안내, 홈은 올렸으면 «선생님 확인 중»(미제출로 보여 다시 올리던 것, 서버 v2.82.1). [v2.88.1] 선곡 카드 제목이 양쪽으로 갈라지던 것. [v2.88] 아래 메뉴에 «선곡» 탭 — 걷기 때 들을 곡 추천(기준: BPM 160↑·K-pop·발라드 금지·선정/폭력 가사 제외), 선정된 곡 TOP·♥ 공감, 내가 추천한 곡(서버 v2.82.0). [v2.87] 홈 화면 아이콘을 관리자 설정에서 고른 것으로(두 학생·크림 / 두 학생·청록 / 아침걷기). [v2.86.1] 앱 이름·탭 제목 «전환기 점심 걷기», 홈 화면 아이콘을 두 학생 그림으로. [v2.86] 학생코드만(생년월일 방식 없앰, 기본 9칸). [v2.85] 로그인 화면을 혜원포털 모양으로(청록 머리 띠, 걷는 두 학생 그림, 학번 4칸·학생코드 9칸, 분홍 «로그인하기»), 버전 바닥글. [v2.84.1] 학번도 4칸 박스. [v2.84] 로그인 화면을 혜원핏 모양으로(학번 한 줄, 학생코드 3-3-3 박스, 안내 문구), 원래 로고가 잠깐 비치던 것 막음. [v2.83] 홈 «점심 만보기» 카드 뺌, «아침 러닝» → «점심 걷기». [v2.82] 달력에 챌린지 날이 있는 주만 표시. [v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
+<!-- ▣ index.html · 학생 앱 · v2.90.0 · 2026-11-04
+     수정요약: [student v2.90] 누적 탭 맨 위 «내 기록 현황»(제출·확인 완료·확인 대기·인정 안 됨, 서버 v2.84.0 getMyRecords). 확인 끝난 날은 «선생님 확인 완료». «아침 운동»→«점심 걷기». [student v2.89] 사진 올리는 동안 화면 가운데 링 게이지(%). 같은 날 다시 올리면 덮어씀(서버 v2.83.0). «선생님이 검토한 뒤 기록에 반영돼요» — 올리기 전·올린 뒤 안내, 홈은 올렸으면 «선생님 확인 중»(미제출로 보여 다시 올리던 것, 서버 v2.82.1). [v2.88.1] 선곡 카드 제목이 양쪽으로 갈라지던 것. [v2.88] 아래 메뉴에 «선곡» 탭 — 걷기 때 들을 곡 추천(기준: BPM 160↑·K-pop·발라드 금지·선정/폭력 가사 제외), 선정된 곡 TOP·♥ 공감, 내가 추천한 곡(서버 v2.82.0). [v2.87] 홈 화면 아이콘을 관리자 설정에서 고른 것으로(두 학생·크림 / 두 학생·청록 / 아침걷기). [v2.86.1] 앱 이름·탭 제목 «전환기 점심 걷기», 홈 화면 아이콘을 두 학생 그림으로. [v2.86] 학생코드만(생년월일 방식 없앰, 기본 9칸). [v2.85] 로그인 화면을 혜원포털 모양으로(청록 머리 띠, 걷는 두 학생 그림, 학번 4칸·학생코드 9칸, 분홍 «로그인하기»), 버전 바닥글. [v2.84.1] 학번도 4칸 박스. [v2.84] 로그인 화면을 혜원핏 모양으로(학번 한 줄, 학생코드 3-3-3 박스, 안내 문구), 원래 로고가 잠깐 비치던 것 막음. [v2.83] 홈 «점심 만보기» 카드 뺌, «아침 러닝» → «점심 걷기». [v2.82] 달력에 챌린지 날이 있는 주만 표시. [v2.81.1] 학생코드 칸을 대문자로 표시·대문자 자판. [v2.81]학번·학생코드를 칸 나눈 OTP 입력으로, 혜원핏 학생코드 로그인(서버 v2.77.0), 머리글 Gugi 폰트.
      이전: [student v2.80] 애플 스타일 디자인 + 선 아이콘 + 홈에 챌린지 달력(참여 여부) + 기록 올리기에서 달력으로 날짜를 골라 지난 기록 입력 + 관리자가 올린 로고. 서버 v2.76.0.
      이전: 누적 달력 날짜별 상세(아침·점심 기록 + 사진) -->
 <html lang="ko">
@@ -549,6 +549,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
 .anz .t{display:block;margin:0;font-size:17px;font-weight:800;color:var(--t);}
 .anz .st{font-size:13.5px;font-weight:700;color:var(--primary);margin-top:6px;}
 .anz .nt{font-size:12px;color:var(--m2);margin:10px 0 0;padding:0;border:none;background:none;box-shadow:none;border-radius:0;}
+/* [v2.90] 선생님 확인 완료 · 내 기록 현황 */
+.ok-box{margin-top:14px;padding:13px 14px;background:#EAF8EF;border:1px solid #C6EBD3;border-radius:12px;font-size:13px;line-height:1.7;color:#2F5E43;}
+.ok-box b:first-child{display:block;color:#1B8A4B;font-size:14px;margin-bottom:4px;}
+.st-tt{font-weight:800;font-size:15px;margin-bottom:6px;}
+.st-sum{display:flex;gap:8px;margin:4px 0 12px;}
+.st-sum div{flex:1;border-radius:12px;padding:10px 6px;text-align:center;}
+.st-sum b{display:block;font-size:22px;line-height:1.2;}
+.st-sum span{font-size:12px;font-weight:700;}
+.st-sum .a{background:#F2F4F6;color:#333;} .st-sum .ok{background:#EAF8EF;color:#1B8A4B;} .st-sum .rv{background:#EAF4FF;color:#1E5FB0;}
+.st-row{display:flex;align-items:center;gap:10px;padding:11px 2px;border-top:1px solid #EEF0F2;}
+.st-row .dd{width:46px;flex:none;text-align:center;font-weight:800;font-size:13px;color:#555;line-height:1.25;}
+.st-row .dd small{display:block;font-weight:600;font-size:11px;color:#999;}
+.st-row .mm{flex:1;min-width:0;font-size:12.5px;color:#666;line-height:1.5;} .st-row .mm b{color:#222;font-size:14px;}
+.st-p{font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;white-space:nowrap;}
+.st-p.ok{background:#EAF8EF;color:#1B8A4B;} .st-p.rv{background:#EAF4FF;color:#1E5FB0;} .st-p.no{background:#FDECEC;color:#C0392B;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
 </head>
@@ -571,7 +586,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
         <p class="pt-hint">혜원핏에서 쓰던 학생코드를 입력하세요</p>
         <button class="btn pt-cta" id="btn-login" onclick="doLogin()">로그인하기</button>
       </div>
-      <div class="login-foot pt-ft"><span class="pt-ftt">2026 전환기 점심 걷기 챌린지</span> · v2.89.0 · 배포 2026-11-04 14:53 (KST)<br>ⓒKIMJINHO</div>
+      <div class="login-foot pt-ft"><span class="pt-ftt">2026 전환기 점심 걷기 챌린지</span> · v2.90.0 · 배포 2026-11-04 18:14 (KST)<br>ⓒKIMJINHO</div>
     </div>
   </div>
 
@@ -685,7 +700,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard Vari
 /* [PWA] GAS API와 fetch 통신 — google.script.run 인터페이스 유지 */
 var API_BASE='https://script.google.com/macros/s/AKfycby_havXeiD6E9PkN3do6WE4wF6OhcM5XotBrPovh85GSrJxHE3jo0R1bx0LBUg1CVeZ/exec';
 function apiCall(fn,args,__apiTry){__apiTry=__apiTry||1;return fetch(API_BASE,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:fn,token:localStorage.getItem('achim_token')||'',args:args||[]})}).then(function(r){return r.text();}).then(function(txt){var res;try{res=JSON.parse(txt);}catch(e){/* 구글이 JSON 대신 HTML을 준 경우 — 잠깐 쉬고 재시도 */if(__apiTry<3){return new Promise(function(ok){setTimeout(ok,600*__apiTry);}).then(function(){return apiCall(fn,args,__apiTry+1);});}throw new Error('서버 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');}if(res&&res.token)localStorage.setItem('achim_token',res.token);return res;});}
-function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto','getUploadStatus','submitInquiry','getMyInquiries','getInquiryPhoto','getNotice','ackNotice','getPublicConfig','getSongs','submitSong','likeSong'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
+function R(){var o={};o.withSuccessHandler=function(f){o._s=f;return o;};o.withFailureHandler=function(f){o._f=f;return o;};['studentLogin','getMyToday','getMySummary','getDashboardData','checkInMorning','submitNrcPhoto','getMyPhoto','getUploadStatus','submitInquiry','getMyInquiries','getInquiryPhoto','getNotice','ackNotice','getPublicConfig','getSongs','submitSong','likeSong','getMyRecords'].forEach(function(k){o[k]=function(){var a=[].slice.call(arguments);apiCall(k,a).then(function(r){o._s&&o._s(r);}).catch(function(e){o._f&&o._f(e);});return o;};});return o;}
 window.google={script:{}};Object.defineProperty(window.google.script,'run',{get:R});
 
 var ST={ no:'', name:'', grade:0, classNo:0, qr:(new URLSearchParams(location.search).get('qr')||''), qrToken:(new URLSearchParams(location.search).get('t')||''), nrcB64:'', nrcMime:'', nrcFp:'', today:null, summary:null, dash:null, scope:'ind', gradeFilter:0 };
@@ -805,8 +820,8 @@ function openDay(dayNum){
   var wx = info.weather ? (' · ' + info.weather) : '';
 
   var mRow = mk>0
-    ? '<div class="drow"><span class="ic">🌅</span><span class="lb">아침 운동</span><span class="vl">'+mk+' km</span></div>'
-    : '<div class="drow off"><span class="ic">🌅</span><span class="lb">아침 운동</span><span class="vl">기록 없음</span></div>';
+    ? '<div class="drow"><span class="ic">👟</span><span class="lb">점심 걷기</span><span class="vl">'+mk+' km</span></div>'
+    : '<div class="drow off"><span class="ic">👟</span><span class="lb">점심 걷기</span><span class="vl">기록 없음</span></div>';
   var lVal = ls>0 ? (ls.toLocaleString()+'보'+(lk>0?(' · '+lk+' km'):'')) : (lk>0 ? (lk+' km') : '');
   var lDev = ((ST.summary && ST.summary.lunchDevices) || {})[dayNum];
   var lRow = lVal
@@ -853,11 +868,11 @@ function paintDayPhoto(r, dayNum){
 function renderHome(d){
   $('hm-day').textContent='DAY '+(d.day||'-');
   var ms=d.morning.status, done=ms==='approved', rv=ms==='review';   // [v2.89] rv = 올렸고 선생님 검토 전
-  var runBadge=done?'<span class="pill pill-done">인증 완료 ✓</span>':(rv?'<span class="pill pill-rv">선생님 확인 중</span>':'<span class="pill pill-wait">미제출</span>');
+  var runBadge=done?'<span class="pill pill-done">✓ 선생님 확인 완료</span>':(rv?'<span class="pill pill-rv">선생님 확인 중</span>':'<span class="pill pill-wait">미제출</span>');
   var runCta=rv
     ? '<div class="rv-box"><b>📮 선생님이 검토한 뒤 기록에 반영돼요</b>사진은 잘 받았어요. <b>다시 올리지 않아도 돼요.</b><br>검토가 끝나면 아래 <b>누적</b> 탭에 기록이 들어가요.</div>'+'<button class="btn btn-ghost" style="margin-top:10px;min-height:44px;font-size:14px;" onclick="go(\'nrc\')">다른 사진으로 다시 올리기</button>'
     : done
-    ? '<div class="center muted" style="font-size:13px;margin-top:12px;">오늘의 걷기 인증 완료! 🎉'+(d.morning.km?' · '+d.morning.km+'km':'')+'</div>'+'<div class="myphoto"><div class="ph-h"><span>📷 내가 올린 사진</span><span style="font-weight:600;color:var(--m2);">눌러서 크게 보기</span></div><div class="ph-b" id="hm-photo-b"></div></div>'
+    ? '<div class="ok-box"><b>✅ 선생님이 확인했어요</b>올린 사진을 선생님이 검토해서 '+(d.morning.km?'<b>'+d.morning.km+'km</b>를 ':'')+'기록에 넣었어요. 누적 탭에서 볼 수 있어요 🎉</div>'+'<div class="myphoto"><div class="ph-h"><span>📷 내가 올린 사진</span><span style="font-weight:600;color:var(--m2);">눌러서 크게 보기</span></div><div class="ph-b" id="hm-photo-b"></div></div>'
     : '<button class="btn btn-cta" style="margin-top:14px;" onclick="go(\'nrc\')"><img class="btn-ic" src="https://arete929.github.io/hyewon-walk/icons/photo.png">걷기 사진 제출</button>';
   var steps=(d.lunch&&d.lunch.steps)||0, goal=10000, pct=Math.min(100,Math.round(steps/goal*100));
   var lunchInfo=steps?('<div class="t2">'+steps.toLocaleString()+'보 / '+((d.lunch.km!=null)?d.lunch.km:Math.round(steps*0.7)/1000)+'km<br><span style="font-size:11.5px;color:var(--m2);font-weight:700;">'+devLabel(d.lunch.device)+' 사용</span></div>'):'<div class="t2">아직 기록 없음</div>';
@@ -1077,7 +1092,25 @@ function renderRank(){
 }
 
 /* ── 누적 ── */
+/* [v2.90] 내 기록 현황 — 제출·확인 완료·확인 대기·인정 안 됨 (서버 getMyRecords) */
+function loadMyRecords(){
+  google.script.run.withSuccessHandler(function(r){ if(r&&r.ok){ST.recs=r; var w=$('st-wrap'); if(w) w.innerHTML=stHtml();} }).withFailureHandler(function(){}).getMyRecords(ST.no);
+}
+function stHtml(){
+  var r=ST.recs; if(!r) return '<div class="card st-card"><div class="st-tt">📋 내 기록 현황</div><p class="center muted" style="font-size:13px;margin:8px 0;">불러오는 중…</p></div>';
+  var c=r.counts||{}, dmap={};
+  ((ST.summary&&ST.summary.days)||[]).forEach(function(x){ if(x.date){var q=x.date.split('-'); dmap[x.day]=(+q[1])+'/'+(+q[2]);} });
+  var rows=(r.items||[]).map(function(it){
+    var t=(it.at||'').split(' ')[1]||'', dd='<div class="dd">'+it.day+'일차<small>'+(dmap[it.day]||'')+'</small></div>';
+    if(it.status==='ok') return '<div class="st-row">'+dd+'<div class="mm"><b>'+it.km+'km</b>'+(it.dur?' · '+esc(it.dur):'')+'<br>'+esc(t)+' 올림 · 선생님이 확인했어요</div><span class="st-p ok">확인 완료</span></div>';
+    if(it.status==='no') return '<div class="st-row">'+dd+'<div class="mm"><b>기록으로 인정되지 않았어요</b><br>'+esc(t)+' 올림'+(it.reason?' · '+esc(it.reason):'')+'</div><span class="st-p no">인정 안 됨</span></div>';
+    return '<div class="st-row">'+dd+'<div class="mm"><b>확인 기다리는 중</b><br>'+esc(t)+' 올림 · 선생님이 보면 기록에 들어가요</div><span class="st-p rv">확인 대기</span></div>';
+  }).join('');
+  if(!rows) rows='<p class="center muted" style="font-size:13px;margin:10px 0 2px;">아직 올린 사진이 없어요</p>';
+  return '<div class="card st-card"><div class="st-tt">📋 내 기록 현황</div><div class="st-sum"><div class="a"><b>'+(c.all||0)+'</b><span>제출</span></div><div class="ok"><b>'+(c.ok||0)+'</b><span>확인 완료</span></div><div class="rv"><b>'+(c.review||0)+'</b><span>확인 대기</span></div></div>'+rows+'</div>';
+}
 function loadCum(){
+  ST.recs=null; loadMyRecords();
   $('cm-body').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
   google.script.run.withSuccessHandler(function(d){ST.summary=d;renderCum(d);}).withFailureHandler(function(){$('cm-body').innerHTML='<p class="center muted" style="padding:30px;">불러오기 실패</p>';}).getMySummary(ST.no);
 }
@@ -1087,7 +1120,7 @@ function renderCum(d){
   var gauge='<div class="card"><div class="cum-top">'+
     '<div class="ring" style="background:conic-gradient(var(--suc) '+deg+'deg,#EDE7E1 0);"><div class="ring-in"><b>'+part+'/'+total+'</b><span>참가일</span></div></div>'+
     '<div class="cum-goals">'+
-      '<div class="goal"><span class="gl">🌅 아침 운동</span><span class="gv">'+(d.morningDays||0)+'일</span></div>'+
+      '<div class="goal"><span class="gl">👟 점심 걷기</span><span class="gv">'+(d.morningDays||0)+'일</span></div>'+
       '<div class="goal"><span class="gl">🚶 점심 만보기</span><span class="gv">'+(d.lunchDays||0)+'일</span></div>'+
     '</div></div></div>';
 
@@ -1117,14 +1150,14 @@ function renderCum(d){
     }
     calInner='<div class="mcal-title">'+title+'</div>'+head+'<div class="mcal">'+cells+'</div>';
   } else { calInner='<p class="center muted" style="padding:16px;">기간 정보가 없어요</p>'; }
-  var calCard='<div class="card">'+calInner+'<div class="legend2"><span><i class="dot m"></i>아침 운동</span><span><i class="dot l"></i>점심 만보기</span><span><i class="tdot"></i>오늘</span></div></div>';
+  var calCard='<div class="card">'+calInner+'<div class="legend2"><span><i class="dot m"></i>점심 걷기</span><span><i class="dot l"></i>점심 만보기</span><span><i class="tdot"></i>오늘</span></div></div>';
 
   var b=d.best;
   var bestCard=b?('<div class="card"><div class="t1" style="font-weight:800;margin-bottom:10px;">🏅 개인 최고기록</div>'+
     '<div class="hero" style="margin:0 0 10px;"><div class="hd">'+esc(b.date)+' · '+b.day+'일차</div><div class="big">'+b.km+'<span style="font-size:20px;font-weight:700;">km</span></div><div class="cap">최장 거리</div></div>'+
     '<div class="grid2"><div class="gstat"><div class="gi">⏱ 운동시간</div><div class="gv">'+(b.durationSec?fmtDur(b.durationSec):'-')+'</div></div><div class="gstat"><div class="gi">🏃 평균 페이스</div><div class="gv">'+(b.pace?(b.pace+'/km'):'-')+'</div></div></div></div>'):'';
 
-  $('cm-body').innerHTML=gauge+calCard+bestCard;
+  $('cm-body').innerHTML='<div id="st-wrap">'+stHtml()+'</div>'+gauge+calCard+bestCard;
 }
 
 /* ── QR 체크인(학교 QR) ── */
